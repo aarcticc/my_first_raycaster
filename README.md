@@ -34,7 +34,6 @@ A lightweight 2D raycasting engine written in pure C using SDL2. Designed for ed
 
 ## 🔧 Build Instructions (Linux)
 
-```bash
 # Install dependencies
 sudo apt update
 sudo apt install build-essential libsdl2-dev
