@@ -8,7 +8,6 @@ A simple raycasting engine implemented in C. This project demonstrates the funda
 - Real-time player movement and rotation
 - Wall collision detection
 - Basic texture support (soon)
-- Configurable map layouts
 
 ## Getting Started
 
