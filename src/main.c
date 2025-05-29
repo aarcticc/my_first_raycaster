@@ -14,7 +14,7 @@ int main(void) {
         return 1;
     }
 
-    Player player = {3.5f, 3.5f, -1.0f, 0.0f, 0.0f, 0.66f};
+    Player player = {1.5f, 1.5f, -1.0f, 0.0f, 0.0f, 0.66f};
     SDL_Event event;
     const Uint8 *keystate = SDL_GetKeyboardState(NULL);
     int running = 1;
