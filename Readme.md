@@ -1,6 +1,6 @@
 # Raycaster
 
-A simple raycasting engine implemented in C. This project demonstrates the fundamentals of 2D raycasting, similar to early 3D games.
+A simple raycasting engine implemented in C. This project demonstrates the fundamentals of 2D raycasting, similar to early 3D games. In the moment it's only avalable on Linux. Windows support coming in the future.
 
 ## Features
 
