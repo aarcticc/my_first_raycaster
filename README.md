@@ -1,5 +1,3 @@
----
-
 # Raycaster (C / SDL2)
 
 A lightweight 2D raycasting engine written in pure C using SDL2. Designed for educational use and prototyping, this project demonstrates core techniques used in early 3D games like *Wolfenstein 3D*.
