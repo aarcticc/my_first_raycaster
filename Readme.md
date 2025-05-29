@@ -65,7 +65,7 @@ Renders the 3D scene based on raycasting results.
 ### Map Format
 
 Maps are defined as 2D arrays, where `1` represents a wall and `0` is empty space.
-"MAP_HEIGHT" and "MAP_WIDTH" are located in map.h. Here's an example:
+"MAP_HEIGHT" and "MAP_WIDTH" are located in map.h. Here's an example with 16x16:
 
 ```c
 int map[MAP_HEIGHT][MAP_WIDTH] = {
