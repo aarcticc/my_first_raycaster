@@ -1,6 +1,6 @@
 # Raycaster
 
-A simple raycasting engine implemented in C. This project demonstrates the fundamentals of 2D raycasting, similar to early 3D games like Wolfenstein 3D.
+A simple raycasting engine implemented in C. This project demonstrates the fundamentals of 2D raycasting, similar to early 3D games.
 
 ## Features
 
@@ -26,14 +26,12 @@ sudo apt-get install libsdl2-dev
 ### Building and Running the Project
 
 ```bash
-gcc -o raycaster main.c raycaster.c map.c -lSDL2
+gcc -o raycaster main.c raycaster.c -lSDL2
 ./raycaster
 ```
 
 - **main.c**: Entry point, handles game loop and input.
 - **raycaster.c**: Core raycasting logic.
-- **map.c**: Map data and rendering.
-- **textures/**: (Optional) Wall textures.
 
 ## Usage
 
@@ -59,21 +57,33 @@ Renders the 3D scene based on raycasting results.
 ### Map Format
 
 Maps are defined as 2D arrays, where `1` represents a wall and `0` is empty space.
+"MAP_HEIGHT" and "MAP_WIDTH" are found in map.h
 
 ```c
-int map_data[5][5] = {
-    {1,1,1,1,1},
-    {1,0,0,0,1},
-    {1,0,1,0,1},
-    {1,0,0,0,1},
-    {1,1,1,1,1}
+int map[MAP_HEIGHT][MAP_WIDTH] = {
+    {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1},
+    {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+    {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+    {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+    {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+    {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+    {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+    {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+    {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+    {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+    {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+    {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+    {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+    {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+    {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+    {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1}
 };
 ```
 
 ## License
 
-MIT License
+![Static Badge](https://img.shields.io/badge/MIT-%20green?label=LICENSE&link=https%3A%2F%2Fgithub.com%2Faarcticc%2FMy-Scripts%2Fblob%2Fmain%2FLICENSE)
 
 ## Credits
 
-Inspired by classic raycasting tutorials and open-source projects.
+Inspired by https://www.youtube.com/@jdh
