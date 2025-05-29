@@ -51,7 +51,7 @@ make run
 
 ---
 
-🪟 Build Instructions (Windows 11 with MinGW)
+## 🪟 Build Instructions (Windows 10/11 with MinGW)
 
 1. Install MinGW-w64
 
@@ -64,14 +64,13 @@ make run
 
 4. Cross-compile using:
 
-
-
+̀̀̀```powershell
 x86_64-w64-mingw32-gcc -o raycaster.exe src/*.c -Iinclude -Llib -lmingw32 -lSDL2main -lSDL2 -mwindows
 
 
 ---
 
-🔄 Roadmap
+## 🔄 Roadmap
 
 [x] Floor and ceiling rendering
 
@@ -81,7 +80,7 @@ x86_64-w64-mingw32-gcc -o raycaster.exe src/*.c -Iinclude -Llib -lmingw32 -lSDL2
 
 [ ] Map editor
 
-[ ] Doors and triggers
+[ ] Portals and triggers
 
 [ ] Sprite support (e.g., objects/enemies)
 
@@ -89,10 +88,10 @@ x86_64-w64-mingw32-gcc -o raycaster.exe src/*.c -Iinclude -Llib -lmingw32 -lSDL2
 
 ---
 
-🔢 Versioning
+## 🔢 Versioning
 
 Current: v0.1.0-alpha
-Semantic versioning with stage tags: alpha, beta, rc, release.
+Semantic versioning with stage tags: alpha, beta, release.
 
 
 ---
@@ -112,7 +111,7 @@ raycaster/
 
 🧑‍💻 Author
 
-Your Name
+¡arctic¿
 github.com/yourusername
 
 
