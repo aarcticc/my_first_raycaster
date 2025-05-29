@@ -33,21 +33,21 @@ A lightweight 2D raycasting engine written in pure C using SDL2. Designed for ed
 ## 🔧 Build Instructions (Linux)
 
 ### Install dependencies
-``bash
+```bash
 sudo apt update
 sudo apt install build-essential libsdl2-dev
 
 ### Clone repository
-``bash
+```bash
 git clone https://github.com/yourusername/raycaster.git
 cd raycaster
 
 ### Build
-``bash
+```bash
 make
 
 ### Run
-̀̀``bash
+̀̀```bash
 make run
 
 
