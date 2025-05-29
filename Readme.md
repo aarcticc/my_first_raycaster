@@ -7,12 +7,12 @@ A simple raycasting engine implemented in C. This project demonstrates the funda
 - 2D grid-based map rendering
 - Real-time player movement and rotation
 - Wall collision detection
-- Basic texture support (optional)
+- Basic texture support (soon)
 - Configurable map layouts
 
 ## Getting Started
 
-### Prerequisites
+### Prerequisites for editing
 
 - C compiler (e.g., gcc or clang)
 - `SDL2` library
@@ -24,19 +24,28 @@ sudo apt-get install libsdl2-dev
 ```
 
 ### Building and Running the Project
-
+In Terminal:
 ```bash
 gcc -o raycaster main.c raycaster.c -lSDL2
 ./raycaster
 ```
+In the VSCode Terminal:
+```bash
+make clean     #to remove previous .o and exec files
+make           #compiling
+./raycaster    #run the game
+```
+
 
 - **main.c**: Entry point, handles game loop and input.
 - **raycaster.c**: Core raycasting logic.
 
-## Usage
+## Controls
 
-- **W/A/S/D**: Move forward/left/back/right
-- **Arrow keys**: Rotate view
+- ↑ - Walk forward
+- ↓ - Walk backward
+- ← - Look left
+- → - Look right
 
 ## Documentation
 
