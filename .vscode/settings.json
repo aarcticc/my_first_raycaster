@@ -1,0 +1,7 @@
+{
+    "files.associations": {
+        "stdlib.h": "c",
+        "raycaster.h": "c"
+    },
+    "makefile.configureOnOpen": false
+}
