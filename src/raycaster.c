@@ -78,24 +78,29 @@ void render_frame(Graphics *gfx, Player *player, int map[MAP_HEIGHT][MAP_WIDTH])
             sideDistY = (mapY + 1.0f - player->y) * deltaDistY;
         }
 
-        // DDA
-        while (!hit) {
-            if (sideDistX < sideDistY) {
-                sideDistX += deltaDistX;
-                mapX += stepX;
-                side = 0;
-            } else {
-                sideDistY += deltaDistY;
-                mapY += stepY;
-                side = 1;
-            }
-            if (map[mapY][mapX] > 0) hit = 1;
+        //prevent looking throught walls
+    while (hit == 0) {
+        // Jump to next square in map
+        if (sideDistX < sideDistY) {
+            sideDistX += deltaDistX;
+            mapX += stepX;
+            side = 0; // hit vertical wall
+        } else {
+            sideDistY += deltaDistY;
+            mapY += stepY;
+            side = 1; // hit horizontal wall
         }
+    
+    // Stop ray when it hits a wall
+    if (map[mapY][mapX] > 0) hit = 1;
+}
+
 
         if (side == 0)
-            perpWallDist = (mapX - player->x + (1 - stepX) / 2.0f) / rayDirX;
+            perpWallDist = (mapX - player->x + (1 - stepX) / 2) / rayDirX;
         else
-            perpWallDist = (mapY - player->y + (1 - stepY) / 2.0f) / rayDirY;
+            perpWallDist = (mapY - player->y + (1 - stepY) / 2) / rayDirY;
+
 
         if (perpWallDist < 0.01f) perpWallDist = 0.01f;
 
@@ -107,6 +112,7 @@ void render_frame(Graphics *gfx, Player *player, int map[MAP_HEIGHT][MAP_WIDTH])
 
         int drawEnd = lineHeight / 2 + SCREEN_HEIGHT / 2;
         if (drawEnd >= SCREEN_HEIGHT) drawEnd = SCREEN_HEIGHT - 1;
+
 
 
         Uint32 color = (side == 0) ? 0xFFAAAAAA : 0xFF888888;
@@ -131,11 +137,10 @@ void handle_input(Player *player, const Uint8 *keystate, int map[MAP_HEIGHT][MAP
         newX = player->x + player->dirX * MOVE_SPEED;
         newY = player->y + player->dirY * MOVE_SPEED;
 
-        if (map[(int)newY][(int)player->x] == 0)
-            player->y = newY;
-
         if (map[(int)player->y][(int)newX] == 0)
             player->x = newX;
+        if (map[(int)newY][(int)player->x] == 0)
+            player->y = newY;
     }
 
     // Move backward
@@ -143,17 +148,17 @@ void handle_input(Player *player, const Uint8 *keystate, int map[MAP_HEIGHT][MAP
         newX = player->x - player->dirX * MOVE_SPEED;
         newY = player->y - player->dirY * MOVE_SPEED;
 
-        if (map[(int)newY][(int)player->x] == 0)
-            player->y = newY;
-
         if (map[(int)player->y][(int)newX] == 0)
             player->x = newX;
+        if (map[(int)newY][(int)player->x] == 0)
+            player->y = newY;
     }
 
     // Rotate left
     if (keystate[SDL_SCANCODE_LEFT]) {
         float oldDirX = player->dirX;
         float oldPlaneX = player->planeX;
+
         player->dirX = player->dirX * cos(ROT_SPEED) - player->dirY * sin(ROT_SPEED);
         player->dirY = oldDirX * sin(ROT_SPEED) + player->dirY * cos(ROT_SPEED);
         player->planeX = player->planeX * cos(ROT_SPEED) - player->planeY * sin(ROT_SPEED);
@@ -164,6 +169,7 @@ void handle_input(Player *player, const Uint8 *keystate, int map[MAP_HEIGHT][MAP
     if (keystate[SDL_SCANCODE_RIGHT]) {
         float oldDirX = player->dirX;
         float oldPlaneX = player->planeX;
+
         player->dirX = player->dirX * cos(-ROT_SPEED) - player->dirY * sin(-ROT_SPEED);
         player->dirY = oldDirX * sin(-ROT_SPEED) + player->dirY * cos(-ROT_SPEED);
         player->planeX = player->planeX * cos(-ROT_SPEED) - player->planeY * sin(-ROT_SPEED);
