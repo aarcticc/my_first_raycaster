@@ -9,7 +9,7 @@
 #define MAP_WIDTH 16
 #define MAP_HEIGHT 16
 #define MOVE_SPEED 0.05f
-#define ROT_SPEED 0.03f
+#define ROT_SPEED 0.04f
 
 typedef struct {
     float x, y;         // Player position
