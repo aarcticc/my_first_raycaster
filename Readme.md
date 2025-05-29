@@ -31,7 +31,7 @@ gcc -o raycaster main.c raycaster.c -lSDL2
 In the VSCode Terminal:
 ```bash
 make clean     #to remove previous .o and exec files
-make           #compiling
+make           #compiling for linux
 ./raycaster    #run the game
 ```
 
