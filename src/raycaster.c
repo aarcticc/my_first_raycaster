@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <math.h>
 
+// graphics initialisation and startup
 int init_graphics(Graphics *gfx) {
     gfx->window = SDL_CreateWindow("Raycaster", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, SCREEN_WIDTH, SCREEN_HEIGHT, 0);
     if (!gfx->window) return -1;
@@ -12,6 +13,7 @@ int init_graphics(Graphics *gfx) {
     return (gfx->pixels) ? 0 : -1;
 }
 
+// shutdown graphics, used line 37 in main.c
 void shutdown_graphics(Graphics *gfx) {
     free(gfx->pixels);
     SDL_DestroyTexture(gfx->texture);
@@ -20,14 +22,16 @@ void shutdown_graphics(Graphics *gfx) {
     SDL_Quit();
 }
 
+// rendering loop
 void render_frame(Graphics *gfx, Player *player, int map[MAP_HEIGHT][MAP_WIDTH]) {
     for (int y = 0; y < SCREEN_HEIGHT / 2; ++y) {
         for (int x = 0; x < SCREEN_WIDTH; ++x) {
-            gfx->pixels[y * SCREEN_WIDTH + x] = 0xFF202020;
+            gfx->pixels[y * SCREEN_WIDTH + x] = 0xFF202020;     // 0xsomething is always a data adress on your harddrive
             gfx->pixels[(y + SCREEN_HEIGHT / 2) * SCREEN_WIDTH + x] = 0xFF606060;
         }
     }
 
+    // raycasting loop
     for (int x = 0; x < SCREEN_WIDTH; x++) {
         float cameraX = 2.0f * x / SCREEN_WIDTH - 1.0f;
         float rayDirX = player->dirX + player->planeX * cameraX;
@@ -69,12 +73,14 @@ void render_frame(Graphics *gfx, Player *player, int map[MAP_HEIGHT][MAP_WIDTH])
         }
     }
 
+    //assigning tasks to the gfx
     SDL_UpdateTexture(gfx->texture, NULL, gfx->pixels, SCREEN_WIDTH * sizeof(Uint32));
     SDL_RenderClear(gfx->renderer);
     SDL_RenderCopy(gfx->renderer, gfx->texture, NULL, NULL);
     SDL_RenderPresent(gfx->renderer);
 }
 
+// input handling for arrow keys
 void handle_input(Player *player, const Uint8 *keystate, int map[MAP_HEIGHT][MAP_WIDTH]) {
     float newX, newY;
     if (keystate[SDL_SCANCODE_UP]) {

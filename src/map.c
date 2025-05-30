@@ -1,5 +1,7 @@
 #include "map.h"
 
+/* - for now 1 is a wall and 0 nothing
+   - MAP_HEIGHT and MAP_WIDTH is located in map.h */
 int map[MAP_HEIGHT][MAP_WIDTH] = {
     {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1},
     {1,0,0,0,1,0,0,0,1,0,1,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,1,0,0,0,0,0,1},
