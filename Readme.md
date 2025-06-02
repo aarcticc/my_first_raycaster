@@ -31,14 +31,15 @@ gcc -o raycaster main.c raycaster.c -lSDL2
 ```
 In the VSCode Terminal:
 ```bash
-make clean     #to remove previous .o and exec files
-make           #compiling for linux
-./raycaster    #run the game
+make clean     # to remove previous .o and exec files
+make           # compiling for linux
+./raycaster    # run the game
 ```
 
 
-- **main.c**: Entry point, handles game loop, map and input.
+- **main.c**: Entry point, handles game loop and input.
 - **raycaster.c**: Core raycasting logic.
+- **map.c**: Stores the map
 
 ## Controls
 
@@ -61,12 +62,12 @@ Moves the player in the specified direction, handling collision.
 
 #### `void draw_scene(SDL_Renderer *renderer, Ray *rays, Texture *textures)`
 
-Renders the 3D scene based on raycasting results.
+Renders the "3D" scene based on raycasting results.
 
 ### Map Format
 
 Maps are defined as 2D arrays, where `1` represents a wall and `0` is empty space.
-"MAP_HEIGHT" and "MAP_WIDTH" are located in map.h. Here's an example with 16x16:
+"MAP_HEIGHT" and "MAP_WIDTH" are defined in map.h. Here's an example with 16x16:
 
 ```c
 int map[MAP_HEIGHT][MAP_WIDTH] = {
