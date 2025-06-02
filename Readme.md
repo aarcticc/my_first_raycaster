@@ -14,6 +14,7 @@ A simple raycasting engine implemented in C. This project demonstrates the funda
 ### Prerequisites for editing
 
 - C compiler (e.g., gcc or clang)
+  Note: clang is not tested
 - `SDL2` library
 
 Install dependencies (on Ubuntu/Debian):
