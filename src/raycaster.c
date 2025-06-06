@@ -74,7 +74,7 @@ void render_frame(Graphics *gfx, Player *player, int map[MAP_HEIGHT][MAP_WIDTH])
         }
     }
 
-    //assigning tasks to the gfx
+    // assigning tasks to the gfx
     SDL_UpdateTexture(gfx->texture, NULL, gfx->pixels, SCREEN_WIDTH * sizeof(Uint32));
     SDL_RenderClear(gfx->renderer);
     SDL_RenderCopy(gfx->renderer, gfx->texture, NULL, NULL);
