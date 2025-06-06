@@ -1,5 +1,5 @@
 #include "raycaster.h"
-#include "map.h"
+#include "map.h" // remove if not needet
 #include <stdio.h>
 
 // main function with sdl,gfx init error messages; player; running loop
