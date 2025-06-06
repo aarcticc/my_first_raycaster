@@ -1,5 +1,6 @@
 #include "raycaster.h"
 #include "map.h"
+#include "texture.h"
 #include <stdlib.h>
 #include <math.h>
 
