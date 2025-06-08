@@ -1,8 +1,8 @@
 CC = gcc
 CFLAGS = -Wall -Wextra -std=c99 -O2 -Iinclude
-LDFLAGS = -lSDL2
+LDFLAGS = -lSDL2 -lSDL2_image
 
-SRC = $(wildcard src/*.c)src/log_utils.c
+SRC = $(wildcard src/*.c)
 OBJ = $(patsubst src/%.c,bin/%.o,$(SRC))
 BIN = raycaster
 

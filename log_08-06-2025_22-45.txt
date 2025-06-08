@@ -1,0 +1,9 @@
+[22:45:36] [SDL] Successfully initialized
+[22:45:36] [Graphics] Successfully initialized
+[22:45:36] [Texture] Successfully loaded assets/wall1.png
+[22:45:36] [Texture] Successfully loaded assets/wall2.png
+[22:45:36] [Texture] Successfully loaded assets/wall3.png
+[22:45:36] [Texture] Successfully loaded assets/wall4.png
+[22:45:36] [Textures] Successfully loaded all textures
+[22:45:36] [System] All systems initialized successfully
+[22:45:36] [Game] Starting main loop

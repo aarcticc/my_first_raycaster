@@ -1,86 +1,101 @@
-#include <SDL2/SDL.h>
-#include <stdint.h>
-#include <stdlib.h>
+#include "texture.h"
+#include "log_utils.h"
+#include <SDL2/SDL_image.h>
 #include <string.h>
 
-#define TEXTURE_SIZE 128
-#define NUM_TEXTURES 4
+TextureInfo wall_textures[NUM_TEXTURES] = {0};
 
-SDL_Texture* textures[NUM_TEXTURES] = {NULL};
-
-static void generate_checkerboard(uint32_t* pixels) {
-    for (int y = 0; y < TEXTURE_SIZE; ++y) {
-        for (int x = 0; x < TEXTURE_SIZE; ++x) {
-            int check = ((x / 16) % 2) ^ ((y / 16) % 2);
-            pixels[y * TEXTURE_SIZE + x] = check ? 0xFFAAAAAA : 0xFF444444;
-        }
+int init_textures(SDL_Renderer* renderer) {
+    // Initialize SDL_image library for loading PNG files
+    int img_flags = IMG_INIT_PNG;
+    if (!(IMG_Init(img_flags) & img_flags)) {
+        char error_msg[128];
+        snprintf(error_msg, sizeof(error_msg), 
+                "[SDL_image] Initialization failed: %s", IMG_GetError());
+        log_error(log_file, error_msg);
+        return 1;
     }
-}
 
-static void generate_vertical_stripes(uint32_t* pixels) {
-    for (int y = 0; y < TEXTURE_SIZE; ++y) {
-        for (int x = 0; x < TEXTURE_SIZE; ++x) {
-            int stripe = (x / 8) % 2;
-            pixels[y * TEXTURE_SIZE + x] = stripe ? 0xFF2222CC : 0xFF111133;
-        }
-    }
-}
+    // Define paths to our texture files
+    const char* paths[NUM_TEXTURES] = {
+        "assets/wall1.png", "assets/wall2.png",
+        "assets/wall3.png", "assets/wall4.png"
+    };
 
-static void generate_horizontal_lines(uint32_t* pixels) {
-    for (int y = 0; y < TEXTURE_SIZE; ++y) {
-        for (int x = 0; x < TEXTURE_SIZE; ++x) {
-            int line = (y / 8) % 2;
-            pixels[y * TEXTURE_SIZE + x] = line ? 0xFF00AA00 : 0xFF003300;
-        }
-    }
-}
-
-static void generate_noise(uint32_t* pixels) {
-    for (int i = 0; i < TEXTURE_SIZE * TEXTURE_SIZE; ++i) {
-        uint8_t val = rand() % 256;
-        pixels[i] = 0xFF000000 | (val << 16) | (val << 8) | val;
-    }
-}
-
-void init_textures(SDL_Renderer* renderer) {
+    // Load each texture file
     for (int i = 0; i < NUM_TEXTURES; ++i) {
-        uint32_t* pixels = malloc(sizeof(uint32_t) * TEXTURE_SIZE * TEXTURE_SIZE);
-        if (!pixels) continue;
-
-        switch (i) {
-            case 0: generate_checkerboard(pixels); break;
-            case 1: generate_vertical_stripes(pixels); break;
-            case 2: generate_horizontal_lines(pixels); break;
-            case 3: generate_noise(pixels); break;
-            default: memset(pixels, 0, TEXTURE_SIZE * TEXTURE_SIZE * sizeof(uint32_t)); break;
-        }
-
-        SDL_Surface* surface = SDL_CreateRGBSurfaceFrom(
-            pixels, TEXTURE_SIZE, TEXTURE_SIZE, 32, TEXTURE_SIZE * 4,
-            0x00FF0000, 0x0000FF00, 0x000000FF, 0xFF000000
-        );
-
+        SDL_Surface* surface = IMG_Load(paths[i]);
         if (!surface) {
-            free(pixels);
-            continue;
+            char error_msg[128];
+            snprintf(error_msg, sizeof(error_msg), 
+                    "[Texture] Failed to load surface %s: %s", paths[i], IMG_GetError());
+            log_error(log_file, error_msg);
+            destroy_textures();
+            IMG_Quit();
+            return 1;
         }
 
-        textures[i] = SDL_CreateTextureFromSurface(renderer, surface);
+        // Convert surface to correct format
+        SDL_Surface* formatted = SDL_ConvertSurfaceFormat(surface, SDL_PIXELFORMAT_ARGB8888, 0);
         SDL_FreeSurface(surface);
-        free(pixels);
+        
+        if (!formatted) {
+            char error_msg[128];
+            snprintf(error_msg, sizeof(error_msg), 
+                    "[Texture] Failed to format surface %s: %s", paths[i], SDL_GetError());
+            log_error(log_file, error_msg);
+            destroy_textures();
+            IMG_Quit();
+            return 1;
+        }
+
+        // Create texture from formatted surface
+        wall_textures[i].texture = SDL_CreateTextureFromSurface(renderer, formatted);
+        wall_textures[i].width = formatted->w;
+        wall_textures[i].height = formatted->h;
+        
+        // Allocate and copy pixel data
+        wall_textures[i].pixels = malloc(formatted->w * formatted->h * sizeof(Uint32));
+        if (wall_textures[i].pixels) {
+            memcpy(wall_textures[i].pixels, formatted->pixels, 
+                   formatted->w * formatted->h * sizeof(Uint32));
+        }
+        
+        SDL_FreeSurface(formatted);
+        
+        if (!wall_textures[i].texture || !wall_textures[i].pixels) {
+            char error_msg[128];
+            snprintf(error_msg, sizeof(error_msg), 
+                    "[Texture] Failed to create texture %s", paths[i]);
+            log_error(log_file, error_msg);
+            destroy_textures();
+            IMG_Quit();
+            return 1;
+        }
+
+        // Log successful texture load
+        char success_msg[128];
+        snprintf(success_msg, sizeof(success_msg), 
+                "[Texture] Successfully loaded %s", paths[i]);
+        log_error(log_file, success_msg);
     }
+
+    return 0;
 }
 
-void destroy_textures() {
-    for (int i = 0; i < NUM_TEXTURES; ++i) {
-        if (textures[i]) {
-            SDL_DestroyTexture(textures[i]);
-            textures[i] = NULL;
+void destroy_textures(void) {
+    // Free each texture and clear the pointer
+    for (int i = 0; i < NUM_TEXTURES; i++) {
+        if (wall_textures[i].texture) {
+            SDL_DestroyTexture(wall_textures[i].texture);
+            wall_textures[i].texture = NULL;
+        }
+        if (wall_textures[i].pixels) {
+            free(wall_textures[i].pixels);
+            wall_textures[i].pixels = NULL;
         }
     }
+    // Shutdown SDL_image library
+    IMG_Quit();
 }
 
-SDL_Texture* get_texture(int index) {
-    if (index < 0 || index >= NUM_TEXTURES) return NULL;
-    return textures[index];
-}
