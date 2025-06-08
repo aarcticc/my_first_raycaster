@@ -1,4 +1,4 @@
-# Raycaster
+# Raycaster (not working atm)
 
 A simple raycasting engine implemented in C. This project demonstrates the fundamentals of 2D raycasting, similar to early 3D games.
 
