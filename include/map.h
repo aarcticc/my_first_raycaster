@@ -6,8 +6,8 @@
 // MAP_WIDTH: Number of cells across (X direction)
 // MAP_HEIGHT: Number of cells down (Y direction)
 // Values must be integers as they're used for array dimensions
-#define MAP_WIDTH 10
-#define MAP_HEIGHT 10
+#define MAP_WIDTH 50
+#define MAP_HEIGHT 50
 
 // Declare an external 2D array that will hold the map data
 // 'extern' keyword indicates this array is defined in another source file
