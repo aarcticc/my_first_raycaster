@@ -1,0 +1,15 @@
+[17:20:38] [SDL] Successfully initialized
+[17:20:38] [Graphics] Successfully initialized
+[17:20:38] [Texture] Successfully loaded assets/wall1.png
+[17:20:38] [Texture] Successfully loaded assets/wall2.png
+[17:20:38] [Texture] Successfully loaded assets/wall3.png
+[17:20:38] [Texture] Successfully loaded assets/wall4.png
+[17:20:38] [Textures] Successfully loaded all textures
+[17:20:38] [System] All systems initialized successfully
+[17:20:38] [Game] Starting main loop
+[17:21:07] [Game] Received quit signal
+[17:21:07] [System] Starting cleanup
+[17:21:07] [Textures] Destroyed
+[17:21:07] [Graphics] Shutdown complete
+[17:21:07] [SDL] Shutdown complete
+[17:21:07] [System] Clean exit

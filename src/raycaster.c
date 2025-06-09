@@ -32,9 +32,6 @@ void shutdown_graphics(Graphics *gfx) {
 
 // Main rendering function - renders one frame
 void render_frame(Graphics *gfx, Player *player, int map[MAP_HEIGHT][MAP_WIDTH]) {
-    // Clear the renderer at the start of each frame
-    SDL_RenderClear(gfx->renderer);
-
     // Draw ceiling and floor colors to pixel buffer
     for (int y = 0; y < SCREEN_HEIGHT / 2; ++y) {
         for (int x = 0; x < SCREEN_WIDTH; ++x) {
@@ -42,12 +39,6 @@ void render_frame(Graphics *gfx, Player *player, int map[MAP_HEIGHT][MAP_WIDTH])
             gfx->pixels[(SCREEN_HEIGHT - 1 - y) * SCREEN_WIDTH + x] = 0xFF606060; // Floor color (lighter)
         }
     }
-
-    // Update texture with background (ceiling/floor)
-    SDL_UpdateTexture(gfx->texture, NULL, gfx->pixels, SCREEN_WIDTH * sizeof(Uint32));
-    
-    // Draw the background
-    SDL_RenderCopy(gfx->renderer, gfx->texture, NULL, NULL);
 
     // RAYCASTING LOOP - cast a ray for each vertical screen column
     for (int x = 0; x < SCREEN_WIDTH; x++) {
@@ -129,6 +120,7 @@ void render_frame(Graphics *gfx, Player *player, int map[MAP_HEIGHT][MAP_WIDTH])
         float step = (float)TEX_HEIGHT / lineHeight;
         float texPos = (drawStart - SCREEN_HEIGHT / 2 + lineHeight / 2) * step;
         
+        // Draw the vertical line pixel by pixel
         for(int y = drawStart; y < drawEnd; y++) {
             int texY = (int)texPos & (TEX_HEIGHT - 1);
             texPos += step;
@@ -149,7 +141,10 @@ void render_frame(Graphics *gfx, Player *player, int map[MAP_HEIGHT][MAP_WIDTH])
         }
     }
 
-    // Present the final frame
+    // Update texture with rendered frame
+    SDL_UpdateTexture(gfx->texture, NULL, gfx->pixels, SCREEN_WIDTH * sizeof(Uint32));
+    SDL_RenderClear(gfx->renderer);
+    SDL_RenderCopy(gfx->renderer, gfx->texture, NULL, NULL);
     SDL_RenderPresent(gfx->renderer);
 }
 
