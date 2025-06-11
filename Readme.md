@@ -1,4 +1,4 @@
-# Raycaster (not working atm)
+# Raycaster
 
 A simple raycasting engine implemented in C. This project demonstrates the fundamentals of 2D raycasting, similar to early 3D games.
 
@@ -7,7 +7,7 @@ A simple raycasting engine implemented in C. This project demonstrates the funda
 - 2D grid-based map rendering
 - Real-time player movement and rotation
 - Wall collision detection
-- Basic texture support
+- Texture support
 
 ## Getting Started
 
