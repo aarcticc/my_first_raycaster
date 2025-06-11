@@ -1,10 +1,23 @@
 #include "raycaster.h"
 #include "texture.h"
 #include "log_utils.h"
+#ifdef _OPENMP
+#include <omp.h>
+#endif
 
 int main(void) {
     // Initialize log file name
     get_log_filename(log_file, sizeof(log_file));
+    
+    // Log OpenMP status
+    #ifdef _OPENMP
+        log_error(log_file, "[System] OpenMP enabled");
+        char omp_msg[64];
+        snprintf(omp_msg, sizeof(omp_msg), "[System] Number of available threads: %d", omp_get_max_threads());
+        log_error(log_file, omp_msg);
+    #else
+        log_error(log_file, "[System] OpenMP disabled");
+    #endif
 
     // Initialize SDL library (required for graphics)
     if (SDL_Init(SDL_INIT_VIDEO) < 0) {
@@ -36,10 +49,56 @@ int main(void) {
     // Log successful startup
     log_error(log_file, "[System] All systems initialized successfully");
 
-    // Initialize player position and direction
-    // Parameters: x, y, directionX, directionY, planeX, planeY
+    // Initialize player position and direction with safety check
     Player player = {1.5f, 1.5f, -1.0f, 0.0f, 0.0f, 0.66f};
     
+    // Check if spawn position is valid, if not find nearest safe spot
+    if (!is_valid_position(player.x, player.y)) {
+        float newX = player.x;
+        float newY = player.y;
+        find_nearest_empty_space(&newX, &newY);
+        player.x = newX;
+        player.y = newY;
+        
+        char spawn_msg[128];
+        snprintf(spawn_msg, sizeof(spawn_msg), 
+                "[Player] Unsafe spawn detected, teleported to (%.2f, %.2f)", 
+                player.x, player.y);
+        log_error(log_file, spawn_msg);
+    }
+
+    // Add texture validation logging
+    log_error(log_file, "[System] Starting texture validation");
+    int valid_textures = 1;
+    for(int i = 0; i < NUM_WALL_TEXTURES; i++) {
+        if (!validate_texture(&wall_textures[i])) {
+            char error_msg[128];
+            snprintf(error_msg, sizeof(error_msg), 
+                    "[Texture] Wall texture %d validation failed", i + 1);
+            log_error(log_file, error_msg);
+            valid_textures = 0;
+        }
+    }
+    
+    if (!validate_texture(&floor_texture)) {
+        log_error(log_file, "[Texture] Floor texture validation failed");
+        valid_textures = 0;
+    }
+    
+    if (!validate_texture(&ceiling_texture)) {
+        log_error(log_file, "[Texture] Ceiling texture validation failed");
+        valid_textures = 0;
+    }
+    
+    if (valid_textures) {
+        log_error(log_file, "[System] All textures validated successfully");
+    } else {
+        log_error(log_file, "[System] Texture validation failed");
+        shutdown_graphics(&gfx);
+        SDL_Quit();
+        return 1;
+    }
+
     // Setup event handling and keyboard state
     SDL_Event event;
     const Uint8 *keystate = SDL_GetKeyboardState(NULL);

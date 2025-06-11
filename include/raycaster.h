@@ -43,9 +43,9 @@
 #define SCREEN_WIDTH 1280
 #define SCREEN_HEIGHT 720
 // MOVE_SPEED controls how fast the player moves
-#define MOVE_SPEED 0.05f
+#define MOVE_SPEED 0.06f
 // ROT_SPEED controls how fast the player rotates
-#define ROT_SPEED 0.04f
+#define ROT_SPEED 0.06f
 
 // Player structure containing position and view direction data
 typedef struct {

@@ -1,6 +1,6 @@
 CC = gcc
-CFLAGS = -Wall -Wextra -std=c99 -O2 -Iinclude
-LDFLAGS = -lSDL2 -lSDL2_image
+CFLAGS = -Wall -Wextra -std=c99 -O2 -Iinclude -fopenmp
+LDFLAGS = -lSDL2 -lSDL2_image -lm -fopenmp
 
 SRC = $(wildcard src/*.c)
 OBJ = $(patsubst src/%.c,bin/%.o,$(SRC))
@@ -27,3 +27,4 @@ run: $(BIN)
 clean:
 	rm -f $(OBJ) $(BIN)
 	rm -rf $(BIN_DIR)
+	rm -f log_*.txt

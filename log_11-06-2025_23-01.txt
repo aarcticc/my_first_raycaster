@@ -1,0 +1,19 @@
+[23:01:57] [System] OpenMP enabled
+[23:01:57] [System] Number of available threads: 12
+[23:01:57] [SDL] Successfully initialized
+[23:01:57] [Graphics] Successfully initialized
+[23:01:57] [Texture] Successfully loaded assets/wall1.png
+[23:01:57] [Texture] Successfully loaded assets/wall2.png
+[23:01:57] [Texture] Successfully loaded assets/wall3.png
+[23:01:57] [Texture] Successfully loaded assets/wall4.png
+[23:01:57] [Textures] Successfully loaded all textures
+[23:01:57] [System] All systems initialized successfully
+[23:01:57] [System] Starting texture validation
+[23:01:57] [System] All textures validated successfully
+[23:01:57] [Game] Starting main loop
+[23:02:10] [Game] Received quit signal
+[23:02:10] [System] Starting cleanup
+[23:02:10] [Textures] Destroyed
+[23:02:10] [Graphics] Shutdown complete
+[23:02:10] [SDL] Shutdown complete
+[23:02:10] [System] Clean exit
