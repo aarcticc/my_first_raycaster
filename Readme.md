@@ -97,4 +97,4 @@ int map[MAP_HEIGHT][MAP_WIDTH] = {
 ## Credits
 
 - Inspired by https://www.youtube.com/@jdh
-- A majority of this code comes from OpenAI's GPT-4-turbo
+- Parts of this code are made with AI
