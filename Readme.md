@@ -58,18 +58,19 @@ make           # compiling for linux
 
 ### Main Functions
 
-̀̀̀```bash
+̀̀̀```c
 void cast_rays(Player *player, int **map_data, Ray *rays)
-```
-Casts rays from the player's position and fills an array of wall hit distances.
-```bash
+
+/* Casts rays from the player's position and fills an array of wall hit distances. */
+
 void move_player(Player *player, int direction, int **map_data)
-```
-Moves the player in the specified direction, handling collision.
-```bash
+
+/* Moves the player in the specified direction, handling collision. */
+
 void draw_scene(SDL_Renderer *renderer, Ray *rays, Texture *textures)
+
+/* Renders the "3D" scene based on raycasting results. */
 ```
-Renders the "3D" scene based on raycasting results.
 
 ### Map Format
 
