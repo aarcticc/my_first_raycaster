@@ -9,6 +9,12 @@ A simple raycasting engine implemented in C. This project demonstrates the funda
 - Wall collision detection
 - Texture support
 
+## Roadmap
+
+- A working gun system
+- Better texture rendering
+- Windows combatibility
+
 ## Getting Started
 
 ### Prerequisites for editing
