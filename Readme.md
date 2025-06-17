@@ -58,7 +58,9 @@ make           # compiling for linux
 
 ### Main Functions
 
+̀̀̀```C
 #### `void cast_rays(Player *player, int **map_data, Ray *rays)`
+```
 
 Casts rays from the player's position and fills an array of wall hit distances.
 
