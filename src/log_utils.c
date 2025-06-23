@@ -1,4 +1,4 @@
-// Include necessary headers for file operations and time functions
+#include "log_utils.h"
 #include <stdio.h>
 #include <time.h>
 

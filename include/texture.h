@@ -9,7 +9,6 @@
 
 // Update texture definitions for clarity
 #define NUM_WALL_TEXTURES 4
-#define NUM_TEXTURES NUM_WALL_TEXTURES  // For backwards compatibility
 #define TEX_WIDTH 64
 #define TEX_HEIGHT 64
 

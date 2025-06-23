@@ -1,9 +1,12 @@
 #include "raycaster.h"
 #include "texture.h"
 #include "log_utils.h"
+#include <stdio.h>
 #ifdef _OPENMP
 #include <omp.h>
 #endif
+
+int map[MAP_HEIGHT][MAP_WIDTH] = {0};
 
 int main(void) {
     // Initialize log file name
