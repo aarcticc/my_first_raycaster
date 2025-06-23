@@ -1,9 +1,6 @@
 #ifndef TEXTURE_H
 #define TEXTURE_H
 
-// Prevents multiple inclusions of this header file
-#pragma once
-
 // Include SDL2 graphics library header
 #include <SDL2/SDL.h>
 

@@ -1,5 +1,4 @@
 #include "texture.h"
-#include "log_utils.h"
 #include <SDL2/SDL_image.h>
 #include <string.h>
 #include <stdlib.h>
@@ -14,8 +13,14 @@ int validate_texture(const TextureInfo* tex) {
 
 static SDL_Surface* load_and_format_texture(const char* path) {
     SDL_Surface* surface = IMG_Load(path);
-    if (!surface) return NULL;
+    if (!surface) {
+        fprintf(stderr, "IMG_Load failed for '%s': %s\n", path, IMG_GetError());
+        return NULL;
+    }
     SDL_Surface* formatted = SDL_ConvertSurfaceFormat(surface, SDL_PIXELFORMAT_ARGB8888, 0);
+    if (!formatted) {
+        fprintf(stderr, "SDL_ConvertSurfaceFormat failed for '%s': %s\n", path, SDL_GetError());
+    }
     SDL_FreeSurface(surface);
     return formatted;
 }
@@ -23,9 +28,7 @@ static SDL_Surface* load_and_format_texture(const char* path) {
 int init_textures(SDL_Renderer* renderer) {
     int img_flags = IMG_INIT_PNG;
     if (!(IMG_Init(img_flags) & img_flags)) {
-        char error_msg[128];
-        snprintf(error_msg, sizeof(error_msg), "[SDL_image] Initialization failed: %s", IMG_GetError());
-        log_error(log_file, error_msg);
+        fprintf(stderr, "IMG_Init failed: %s\n", IMG_GetError());
         return 1;
     }
 
@@ -37,7 +40,11 @@ int init_textures(SDL_Renderer* renderer) {
     for (int i = 0; i < NUM_WALL_TEXTURES; ++i) {
         SDL_Surface* formatted = load_and_format_texture(wall_paths[i]);
         if (!formatted || formatted->w != TEX_WIDTH || formatted->h != TEX_HEIGHT) {
-            log_error(log_file, "[Texture] Invalid wall texture dimensions or load failure");
+            if (!formatted)
+                fprintf(stderr, "Failed to load wall texture %d: %s\n", i+1, wall_paths[i]);
+            else
+                fprintf(stderr, "Wall texture %d has wrong size: %dx%d (expected %dx%d)\n",
+                        i+1, formatted->w, formatted->h, TEX_WIDTH, TEX_HEIGHT);
             if (formatted) SDL_FreeSurface(formatted);
             destroy_textures();
             return 1;
@@ -51,7 +58,6 @@ int init_textures(SDL_Renderer* renderer) {
         }
         SDL_FreeSurface(formatted);
         if (!wall_textures[i].texture || !wall_textures[i].pixels) {
-            log_error(log_file, "[Texture] Failed to create wall texture");
             destroy_textures();
             return 1;
         }
@@ -63,7 +69,16 @@ int init_textures(SDL_Renderer* renderer) {
     if (!floor_formatted || !ceiling_formatted ||
         floor_formatted->w != TEX_WIDTH || floor_formatted->h != TEX_HEIGHT ||
         ceiling_formatted->w != TEX_WIDTH || ceiling_formatted->h != TEX_HEIGHT) {
-        log_error(log_file, "[Texture] Invalid floor/ceiling texture dimensions or load failure");
+        if (!floor_formatted)
+            fprintf(stderr, "Failed to load floor texture: assets/floor.png\n");
+        else if (floor_formatted->w != TEX_WIDTH || floor_formatted->h != TEX_HEIGHT)
+            fprintf(stderr, "Floor texture has wrong size: %dx%d (expected %dx%d)\n",
+                    floor_formatted->w, floor_formatted->h, TEX_WIDTH, TEX_HEIGHT);
+        if (!ceiling_formatted)
+            fprintf(stderr, "Failed to load ceiling texture: assets/ceiling.png\n");
+        else if (ceiling_formatted->w != TEX_WIDTH || ceiling_formatted->h != TEX_HEIGHT)
+            fprintf(stderr, "Ceiling texture has wrong size: %dx%d (expected %dx%d)\n",
+                    ceiling_formatted->w, ceiling_formatted->h, TEX_WIDTH, TEX_HEIGHT);
         if (floor_formatted) SDL_FreeSurface(floor_formatted);
         if (ceiling_formatted) SDL_FreeSurface(ceiling_formatted);
         destroy_textures();
@@ -102,34 +117,7 @@ void destroy_textures(void) {
             wall_textures[i].pixels = NULL;
         }
     }
-    if (floor_texture.texture) {
-        SDL_DestroyTexture(floor_texture.texture);
-        floor_texture.texture = NULL;
-    }
-    if (floor_texture.pixels) {
-        free(floor_texture.pixels);
-        floor_texture.pixels = NULL;
-    }
-    if (ceiling_texture.texture) {
-        SDL_DestroyTexture(ceiling_texture.texture);
-        ceiling_texture.texture = NULL;
-    }
-    if (ceiling_texture.pixels) {
-        free(ceiling_texture.pixels);
-        ceiling_texture.pixels = NULL;
-    }
-    IMG_Quit();
-}
-            SDL_DestroyTexture(wall_textures[i].texture);
-            wall_textures[i].texture = NULL;
-        }
-        if (wall_textures[i].pixels) {
-            free(wall_textures[i].pixels);
-            wall_textures[i].pixels = NULL;
-        }
-    }
 
-    // Free floor texture
     if (floor_texture.texture) {
         SDL_DestroyTexture(floor_texture.texture);
         floor_texture.texture = NULL;
@@ -139,7 +127,6 @@ void destroy_textures(void) {
         floor_texture.pixels = NULL;
     }
 
-    // Free ceiling texture
     if (ceiling_texture.texture) {
         SDL_DestroyTexture(ceiling_texture.texture);
         ceiling_texture.texture = NULL;

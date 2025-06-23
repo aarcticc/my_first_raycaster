@@ -6,6 +6,10 @@
 
 extern int map[MAP_HEIGHT][MAP_WIDTH];
 
+// Add prototypes for map loading/saving
+int load_map(const char* filename, int map[MAP_HEIGHT][MAP_WIDTH]);
+int save_map(const char* filename, int map[MAP_HEIGHT][MAP_WIDTH]);
+
 void find_nearest_empty_space(float* x, float* y);
 int is_valid_position(float x, float y);
 

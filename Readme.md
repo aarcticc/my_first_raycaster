@@ -1,45 +1,10 @@
 # Raycaster
 
-A simple raycasting engine implemented in C. This project demonstrates the fundamentals of 2D raycasting, similar to early 3D games.
+A 
 
 ## Features
 
-- 2D grid-based map rendering
-- Real-time player movement and rotation
-- Wall collision detection
-- Texture support
-
-## Getting Started
-
-### Prerequisites for editing
-
-- C compiler (e.g., gcc or clang)
-  Note: clang is not tested
-- `SDL2` library
-
-Install dependencies (on Ubuntu/Debian):
-
-```bash
-sudo apt-get install libsdl2-dev
-```
-
-### Building and Running the Project
-In Terminal:
-```bash
-gcc -o raycaster main.c raycaster.c -lSDL2
-./raycaster
-```
-In the VSCode Terminal:
-```bash
-make clean     # to remove previous .o and exec files
-make           # compiling for linux
-./raycaster    # run the game
-```
-
-
-- **main.c**: Entry point, handles game loop and input.
-- **raycaster.c**: Core raycasting logic.
-- **map.c**: Stores the map
+soon
 
 ## Controls
 
@@ -50,45 +15,7 @@ make           # compiling for linux
 
 ## Documentation
 
-### Main Functions
-
-#### `void cast_rays(Player *player, int **map_data, Ray *rays)`
-
-Casts rays from the player's position and fills an array of wall hit distances.
-
-#### `void move_player(Player *player, int direction, int **map_data)`
-
-Moves the player in the specified direction, handling collision.
-
-#### `void draw_scene(SDL_Renderer *renderer, Ray *rays, Texture *textures)`
-
-Renders the "3D" scene based on raycasting results.
-
-### Map Format
-
-Maps are defined as 2D arrays, where `1` represents a wall and `0` is empty space.
-"MAP_HEIGHT" and "MAP_WIDTH" are defined in map.h. Here's an example with 16x16:
-
-```c
-int map[MAP_HEIGHT][MAP_WIDTH] = {
-    {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1},
-    {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-    {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-    {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-    {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-    {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-    {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-    {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-    {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-    {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-    {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-    {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-    {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-    {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-    {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-    {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1}
-};
-```
+soon
 
 ## License
 

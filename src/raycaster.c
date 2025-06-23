@@ -89,7 +89,8 @@ void render_frame(Graphics *gfx, Player *player, int map[MAP_HEIGHT][MAP_WIDTH])
         int drawEnd = lineHeight / 2 + SCREEN_HEIGHT / 2;
         if (drawEnd >= SCREEN_HEIGHT) drawEnd = SCREEN_HEIGHT - 1;
         int tex_id = map[mapY][mapX] - 1;
-        if (tex_id >= 0 && tex_id < NUM_WALL_TEXTURES && validate_texture(&wall_textures[tex_id])) {
+        if (tex_id < 0 || tex_id >= NUM_WALL_TEXTURES) continue; // skip invalid
+        if (validate_texture(&wall_textures[tex_id])) {
             float wallX;
             if (side == 0) wallX = player->y + perpWallDist * rayDirY;
             else wallX = player->x + perpWallDist * rayDirX;
@@ -116,53 +117,6 @@ void render_frame(Graphics *gfx, Player *player, int map[MAP_HEIGHT][MAP_WIDTH])
             }
         }
     }
-    SDL_UpdateTexture(gfx->texture, NULL, gfx->pixels, SCREEN_WIDTH * sizeof(Uint32));
-    SDL_RenderClear(gfx->renderer);
-    SDL_RenderCopy(gfx->renderer, gfx->texture, NULL, NULL);
-    SDL_RenderPresent(gfx->renderer);
-}
-
-void handle_input(Player *player, const Uint8 *keystate, int map[MAP_HEIGHT][MAP_WIDTH]) {
-    float newX, newY;
-    if (keystate[SDL_SCANCODE_UP]) {
-        newX = player->x + player->dirX * MOVE_SPEED;
-        newY = player->y + player->dirY * MOVE_SPEED;
-        if (map[(int)newY][(int)player->x] == 0) player->y = newY;
-        if (map[(int)player->y][(int)newX] == 0) player->x = newX;
-    }
-    if (keystate[SDL_SCANCODE_DOWN]) {
-        newX = player->x - player->dirX * MOVE_SPEED;
-        newY = player->y - player->dirY * MOVE_SPEED;
-        if (map[(int)newY][(int)player->x] == 0) player->y = newY;
-        if (map[(int)player->y][(int)newX] == 0) player->x = newX;
-    }
-    if (keystate[SDL_SCANCODE_LEFT]) {
-        float oldDirX = player->dirX;
-        player->dirX = player->dirX * cos(ROT_SPEED) - player->dirY * sin(ROT_SPEED);
-        player->dirY = oldDirX * sin(ROT_SPEED) + player->dirY * cos(ROT_SPEED);
-        float oldPlaneX = player->planeX;
-        player->planeX = player->planeX * cos(ROT_SPEED) - player->planeY * sin(ROT_SPEED);
-        player->planeY = oldPlaneX * sin(ROT_SPEED) + player->planeY * cos(ROT_SPEED);
-    }
-    if (keystate[SDL_SCANCODE_RIGHT]) {
-        float oldDirX = player->dirX;
-        player->dirX = player->dirX * cos(-ROT_SPEED) - player->dirY * sin(-ROT_SPEED);
-        player->dirY = oldDirX * sin(-ROT_SPEED) + player->dirY * cos(-ROT_SPEED);
-        float oldPlaneX = player->planeX;
-        player->planeX = player->planeX * cos(-ROT_SPEED) - player->planeY * sin(-ROT_SPEED);
-        player->planeY = oldPlaneX * sin(-ROT_SPEED) + player->planeY * cos(-ROT_SPEED);
-    }
-}
-                        Uint8 g = ((color >> 8) & 0xFF) * 0.7;
-                        Uint8 b = (color & 0xFF) * 0.7;
-                        color = (0xFF << 24) | (r << 16) | (g << 8) | b;
-                    }
-                    
-                    gfx->pixels[y * SCREEN_WIDTH + x] = color;
-                }
-            }
-        }
-    }
 
     // Update texture with rendered frame
     SDL_UpdateTexture(gfx->texture, NULL, gfx->pixels, SCREEN_WIDTH * sizeof(Uint32));
@@ -171,23 +125,46 @@ void handle_input(Player *player, const Uint8 *keystate, int map[MAP_HEIGHT][MAP
     SDL_RenderPresent(gfx->renderer);
 }
 
-// Handle player movement and rotation using keyboard input
 void handle_input(Player *player, const Uint8 *keystate, int map[MAP_HEIGHT][MAP_WIDTH]) {
     float newX, newY;
-    
-    // Forward movement
+    const float COLLISION_BUFFER = 0.2f;
+    // Forward
     if (keystate[SDL_SCANCODE_UP]) {
         newX = player->x + player->dirX * MOVE_SPEED;
         newY = player->y + player->dirY * MOVE_SPEED;
-        // Only move if new position is not in a wall
-        if (map[(int)newY][(int)player->x] == 0) player->y = newY;
-        if (map[(int)player->y][(int)newX] == 0) player->x = newX;
+        // X axis
+        if (map[(int)player->y][(int)(newX + (player->dirX > 0 ? COLLISION_BUFFER : -COLLISION_BUFFER))] == 0)
+            player->x = newX;
+        // Y axis
+        if (map[(int)(newY + (player->dirY > 0 ? COLLISION_BUFFER : -COLLISION_BUFFER))][(int)player->x] == 0)
+            player->y = newY;
     }
+    // Backward
     if (keystate[SDL_SCANCODE_DOWN]) {
         newX = player->x - player->dirX * MOVE_SPEED;
         newY = player->y - player->dirY * MOVE_SPEED;
-        if (map[(int)newY][(int)player->x] == 0) player->y = newY;
-        if (map[(int)player->y][(int)newX] == 0) player->x = newX;
+        if (map[(int)player->y][(int)(newX + (player->dirX < 0 ? COLLISION_BUFFER : -COLLISION_BUFFER))] == 0)
+            player->x = newX;
+        if (map[(int)(newY + (player->dirY < 0 ? COLLISION_BUFFER : -COLLISION_BUFFER))][(int)player->x] == 0)
+            player->y = newY;
+    }
+    // Strafe left (A)
+    if (keystate[SDL_SCANCODE_A]) {
+        newX = player->x - player->planeX * MOVE_SPEED;
+        newY = player->y - player->planeY * MOVE_SPEED;
+        if (map[(int)player->y][(int)(newX + (player->planeX < 0 ? COLLISION_BUFFER : -COLLISION_BUFFER))] == 0)
+            player->x = newX;
+        if (map[(int)(newY + (player->planeY < 0 ? COLLISION_BUFFER : -COLLISION_BUFFER))][(int)player->x] == 0)
+            player->y = newY;
+    }
+    // Strafe right (D)
+    if (keystate[SDL_SCANCODE_D]) {
+        newX = player->x + player->planeX * MOVE_SPEED;
+        newY = player->y + player->planeY * MOVE_SPEED;
+        if (map[(int)player->y][(int)(newX + (player->planeX > 0 ? COLLISION_BUFFER : -COLLISION_BUFFER))] == 0)
+            player->x = newX;
+        if (map[(int)(newY + (player->planeY > 0 ? COLLISION_BUFFER : -COLLISION_BUFFER))][(int)player->x] == 0)
+            player->y = newY;
     }
     if (keystate[SDL_SCANCODE_LEFT]) {
         float oldDirX = player->dirX;
