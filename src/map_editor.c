@@ -43,17 +43,74 @@ static void draw_grid(SDL_Renderer* renderer) {
     }
 }
 
-// Draws the save button in the sidebar
 static void draw_save_button(SDL_Renderer* renderer) {
     SDL_Rect btn = { SAVE_BTN_X, SAVE_BTN_Y, SAVE_BTN_W, SAVE_BTN_H };
-    SDL_SetRenderDrawColor(renderer, 40, 180, 40, 255);
+    
+    // Button background with gradient effect
+    SDL_SetRenderDrawColor(renderer, 40, 180, 40, 255);  // Main green color
     SDL_RenderFillRect(renderer, &btn);
-    SDL_SetRenderDrawColor(renderer, 0, 80, 0, 255);
+    
+    // Top highlight
+    SDL_SetRenderDrawColor(renderer, 60, 200, 60, 255);
+    SDL_Rect highlight = { btn.x + 1, btn.y + 1, btn.w - 2, 2 };
+    SDL_RenderFillRect(renderer, &highlight);
+    
+    // Bottom shadow
+    SDL_SetRenderDrawColor(renderer, 20, 160, 20, 255);
+    SDL_Rect shadow = { btn.x + 1, btn.y + btn.h - 3, btn.w - 2, 2 };
+    SDL_RenderFillRect(renderer, &shadow);
+    
+    // Border
+    SDL_SetRenderDrawColor(renderer, 0, 100, 0, 255);
     SDL_RenderDrawRect(renderer, &btn);
-    // Minimal "SAVE" text using rectangles
+    
+    // Draw "SAVE" text using multiple rectangles
     SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
-    SDL_Rect s = { btn.x + 30, btn.y + 12, 60, 16 };
-    SDL_RenderFillRect(renderer, &s);
+    
+    // S
+    SDL_Rect s1 = { btn.x + 20, btn.y + 12, 20, 3 };  // Top horizontal
+    SDL_Rect s2 = { btn.x + 20, btn.y + 12, 3, 8 };   // Top vertical
+    SDL_Rect s3 = { btn.x + 20, btn.y + 19, 20, 3 };  // Middle horizontal
+    SDL_Rect s4 = { btn.x + 37, btn.y + 21, 3, 8 };   // Bottom vertical
+    SDL_Rect s5 = { btn.x + 20, btn.y + 28, 20, 3 };  // Bottom horizontal
+    
+    // A
+    SDL_Rect a1 = { btn.x + 45, btn.y + 12, 3, 19 };  // Left vertical
+    SDL_Rect a2 = { btn.x + 45, btn.y + 12, 15, 3 };  // Top horizontal
+    SDL_Rect a3 = { btn.x + 57, btn.y + 12, 3, 19 };  // Right vertical
+    SDL_Rect a4 = { btn.x + 45, btn.y + 19, 15, 3 };  // Middle horizontal
+    
+    // V
+    SDL_Rect v1 = { btn.x + 65, btn.y + 12, 3, 13 };  // Left vertical
+    SDL_Rect v2 = { btn.x + 65, btn.y + 24, 8, 3 };   // Bottom diagonal
+    SDL_Rect v3 = { btn.x + 77, btn.y + 12, 3, 13 };  // Right vertical
+    
+    // E
+    SDL_Rect e1 = { btn.x + 85, btn.y + 12, 15, 3 };  // Top horizontal
+    SDL_Rect e2 = { btn.x + 85, btn.y + 12, 3, 19 };  // Vertical
+    SDL_Rect e3 = { btn.x + 85, btn.y + 19, 15, 3 };  // Middle horizontal
+    SDL_Rect e4 = { btn.x + 85, btn.y + 28, 15, 3 };  // Bottom horizontal
+    
+    // Render all parts of the letters
+    SDL_RenderFillRect(renderer, &s1);
+    SDL_RenderFillRect(renderer, &s2);
+    SDL_RenderFillRect(renderer, &s3);
+    SDL_RenderFillRect(renderer, &s4);
+    SDL_RenderFillRect(renderer, &s5);
+    
+    SDL_RenderFillRect(renderer, &a1);
+    SDL_RenderFillRect(renderer, &a2);
+    SDL_RenderFillRect(renderer, &a3);
+    SDL_RenderFillRect(renderer, &a4);
+    
+    SDL_RenderFillRect(renderer, &v1);
+    SDL_RenderFillRect(renderer, &v2);
+    SDL_RenderFillRect(renderer, &v3);
+    
+    SDL_RenderFillRect(renderer, &e1);
+    SDL_RenderFillRect(renderer, &e2);
+    SDL_RenderFillRect(renderer, &e3);
+    SDL_RenderFillRect(renderer, &e4);
 }
 
 // Checks if mouse is over the save button
