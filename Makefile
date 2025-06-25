@@ -1,32 +1,43 @@
-CC = gcc
-CFLAGS = -Wall -Wextra -std=c99 -O2 -Iinclude -fopenmp
-LDFLAGS = -lSDL2 -lSDL2_image -lm -fopenmp
+# C++ Project Makefile
+# Compiler and flags
+CXX = g++
+CXXFLAGS = -Wall -Wextra -std=c++17 -O2 -Iinclude
+LDFLAGS = -lSDL2 -lSDL2_image -lm
 
-SRC = $(wildcard src/*.c)
+# Project structure
+SRC_DIR = src
+INC_DIR = include
 BIN_DIR = bin
+TARGET = raycaster
 
-RAYCASTER_OBJ = bin/main.o bin/map.o bin/raycaster.o bin/texture.o
-MAP_EDITOR_OBJ = bin/map_editor.o bin/map.o bin/texture.o
+# Source files and object files
+SOURCES = $(wildcard $(SRC_DIR)/*.cpp)
+OBJECTS = $(patsubst $(SRC_DIR)/%.cpp,$(BIN_DIR)/%.o,$(SOURCES))
 
-.PHONY: all clean run
+# Default target
+.PHONY: all clean
 
-all: mkdir_bin raycaster map_editor
+all: $(TARGET)
 
-mkdir_bin:
+# Create binary directory if it doesn't exist
+$(BIN_DIR):
 	@mkdir -p $(BIN_DIR)
 
-raycaster: $(RAYCASTER_OBJ)
-	$(CC) -o $@ $^ $(LDFLAGS)
+# Link the final executable
+$(TARGET): $(BIN_DIR) $(OBJECTS)
+	@echo "Linking $(TARGET)..."
+	$(CXX) -o $@ $(OBJECTS) $(LDFLAGS)
+	@echo "Build complete: $(TARGET)"
 
-map_editor: $(MAP_EDITOR_OBJ)
-	$(CC) -o $@ $^ $(LDFLAGS)
+# Compile source files to object files
+$(BIN_DIR)/%.o: $(SRC_DIR)/%.cpp | $(BIN_DIR)
+	@echo "Compiling $<..."
+	$(CXX) $(CXXFLAGS) -c $< -o $@
 
-bin/%.o: src/%.c
-	$(CC) $(CFLAGS) -c $< -o $@
-
-run: raycaster
-	./raycaster
-
+# Clean build artifacts
 clean:
-	rm -f bin/*.o raycaster map_editor
+	@echo "Cleaning build artifacts..."
 	rm -rf $(BIN_DIR)
+	rm -f $(TARGET)
+	rm -f log_*.txt
+	@echo "Clean complete"
