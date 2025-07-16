@@ -38,5 +38,11 @@ void destroy_textures(void);
 // Add texture validation function
 int validate_texture(const TextureInfo* tex);
 
+// Add function to create empty texture
+int create_empty_texture(SDL_Renderer* renderer, TextureInfo* tex, int width, int height);
+
+// Add function to update texture pixels
+void update_texture_pixels(TextureInfo* tex);
+
 #endif
 

@@ -41,3 +41,19 @@ void log_error(const char *filename, const char *message) {
     // Close file to save changes and free resources
     fclose(fp);
 }
+
+// Function to log a separator line with the current phase
+void log_separator(const char* filename, const char* phase) {
+    // Open file in append mode ("a")
+    // This creates the file if it doesn't exist
+    FILE *fp = fopen(filename, "a");
+    if (!fp) return;  // Return silently if file can't be opened
+
+    // Write separator lines and phase information
+    fprintf(fp, "\n%s\n", "===========================================");
+    fprintf(fp, "              %s              \n", phase);
+    fprintf(fp, "%s\n\n", "===========================================");
+
+    // Close file to save changes and free resources
+    fclose(fp);
+}

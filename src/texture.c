@@ -152,3 +152,27 @@ void destroy_textures(void) {
     IMG_Quit();
 }
 
+int create_empty_texture(SDL_Renderer* renderer, TextureInfo* tex, int width, int height) {
+    tex->width = width;
+    tex->height = height;
+    
+    // Create SDL texture
+    tex->texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_ARGB8888,
+                                   SDL_TEXTUREACCESS_STREAMING, width, height);
+    if (!tex->texture) return 1;
+    
+    // Allocate pixel buffer
+    tex->pixels = malloc(width * height * sizeof(Uint32));
+    if (!tex->pixels) {
+        SDL_DestroyTexture(tex->texture);
+        return 1;
+    }
+    
+    return 0;
+}
+
+void update_texture_pixels(TextureInfo* tex) {
+    SDL_UpdateTexture(tex->texture, NULL, tex->pixels,
+                     tex->width * sizeof(Uint32));
+}
+

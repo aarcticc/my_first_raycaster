@@ -1,0 +1,43 @@
+
+===========================================
+              GAME INITIALIZATION              
+===========================================
+
+[12:30:54] [System] OpenMP enabled
+[12:30:54] [System] Number of available threads: 6
+[12:30:54] [SDL] Successfully initialized
+[12:30:54] [Graphics] Successfully initialized
+[12:30:54] [Texture] Successfully loaded assets/wall1.png
+[12:30:54] [Texture] Successfully loaded assets/wall2.png
+[12:30:54] [Texture] Successfully loaded assets/wall3.png
+[12:30:54] [Texture] Successfully loaded assets/wall4.png
+[12:30:54] [Textures] Successfully loaded all textures
+[12:30:54] [Enemies] Initializing enemy system
+[12:30:54] [Enemies] Enemy system initialized successfully
+[12:30:54] [Enemies] Successfully initialized
+[12:30:54] [System] All systems initialized successfully
+[12:30:54] [System] Starting texture validation
+[12:30:54] [System] All textures validated successfully
+[12:30:54] [Game] Starting main loop
+
+===========================================
+              STARTING MAIN LOOP              
+===========================================
+
+[12:31:00] [Game] Received quit signal
+[12:31:00] [System] Starting cleanup
+
+===========================================
+              SHUTDOWN SEQUENCE              
+===========================================
+
+[12:31:00] [Enemies] Enemy system destroyed
+[12:31:00] [Textures] Destroyed
+[12:31:00] [Graphics] Shutdown complete
+[12:31:00] [SDL] Shutdown complete
+[12:31:00] [System] Clean exit
+
+===========================================
+              CLEAN EXIT              
+===========================================
+

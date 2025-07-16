@@ -21,4 +21,10 @@ void get_log_filename(char *buffer, size_t size);
 //   message  - the error message to be logged
 void log_error(const char *filename, const char *message);
 
+// Function to write a separator line to the log file
+// Parameters:
+//   filename - name of the file where the separator is logged
+//   phase    - the game phase to be logged
+void log_separator(const char* filename, const char* phase);
+
 #endif

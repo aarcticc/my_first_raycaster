@@ -1,6 +1,7 @@
 #include "raycaster.h"
 #include "texture.h"
 #include "log_utils.h"
+#include "enemy.h"
 #ifdef _OPENMP
 #include <omp.h>
 #endif
@@ -8,6 +9,7 @@
 int main(void) {
     // Initialize log file name
     get_log_filename(log_file, sizeof(log_file));
+    log_separator(log_file, "GAME INITIALIZATION");
     
     // Log OpenMP status
     #ifdef _OPENMP
@@ -21,7 +23,7 @@ int main(void) {
 
     // Initialize SDL library (required for graphics)
     if (SDL_Init(SDL_INIT_VIDEO) < 0) {
-        fprintf(stderr, "SDL_Init failed: %s\n", SDL_GetError());
+        log_separator(log_file, "ERROR");
         log_error(log_file, "[SDL] Initialization failed");
         return 1;
     }
@@ -45,6 +47,16 @@ int main(void) {
         return 1;
     }
     log_error(log_file, "[Textures] Successfully loaded all textures");
+
+    // Initialize enemies after textures are loaded
+    if (init_enemies(gfx.renderer) != 0) {
+        log_error(log_file, "[Enemies] Failed to initialize");
+        destroy_textures();
+        shutdown_graphics(&gfx);
+        SDL_Quit();
+        return 1;
+    }
+    log_error(log_file, "[Enemies] Successfully initialized");
 
     // Log successful startup
     log_error(log_file, "[System] All systems initialized successfully");
@@ -105,7 +117,7 @@ int main(void) {
     int running = 1;
 
     log_error(log_file, "[Game] Starting main loop");
-
+    log_separator(log_file, "STARTING MAIN LOOP");
     // Main game loop
     while (running) {
         // Handle SDL events (like window closing)
@@ -126,6 +138,8 @@ int main(void) {
 
     // Cleanup everything in reverse order of initialization
     log_error(log_file, "[System] Starting cleanup");
+    log_separator(log_file, "SHUTDOWN SEQUENCE");
+    destroy_enemies();
     destroy_textures();
     log_error(log_file, "[Textures] Destroyed");
     shutdown_graphics(&gfx);
@@ -133,5 +147,6 @@ int main(void) {
     SDL_Quit();
     log_error(log_file, "[SDL] Shutdown complete");
     log_error(log_file, "[System] Clean exit");
+    log_separator(log_file, "CLEAN EXIT");
     return 0;
 }
