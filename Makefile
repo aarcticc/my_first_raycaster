@@ -28,3 +28,11 @@ clean:
 	rm -f $(OBJ) $(BIN)
 	rm -rf $(BIN_DIR)
 	rm -f log_*.txt
+
+# Add mapmaker tool
+.PHONY: mapmaker
+mapmaker:
+	@echo "Setting up Map Maker tool..."
+	@python3 -m pip install -r tools/mapmaker/requirements.txt
+	@echo "Running Map Maker..."
+	@python3 tools/mapmaker/mapmaker.py
