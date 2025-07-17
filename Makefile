@@ -29,10 +29,11 @@ clean:
 	rm -rf $(BIN_DIR)
 	rm -f log_*.txt
 
-# Add mapmaker tool
+# Update mapmaker target to only compile the C version
 .PHONY: mapmaker
-mapmaker:
-	@echo "Setting up Map Maker tool..."
-	@python3 -m pip install -r tools/mapmaker/requirements.txt
-	@echo "Running Map Maker..."
-	@python3 tools/mapmaker/mapmaker.py
+mapmaker: 
+	@mkdir -p bin
+	$(CC) $(CFLAGS) src/mapmaker/mapmaker.c -o bin/mapmaker $(LDFLAGS)
+	@echo "Map Maker compiled successfully. Run with: ./bin/mapmaker"
+	@cd tools/mapmaker_rust && cargo build --release
+	@echo "Rust Map Maker compiled successfully. Run with: ./tools/mapmaker_rust/target/release/mapmaker"
