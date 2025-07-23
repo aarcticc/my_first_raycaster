@@ -25,28 +25,34 @@ int init_enemies(SDL_Renderer* renderer) {
     return 0;
 }
 
-void generate_enemy_texture(SDL_Renderer* renderer, TextureInfo* texture) {
-    // Generate a simple geometric pattern
+void generate_enemy_texture(SDL_Renderer* renderer __attribute__((unused)), TextureInfo* texture) {
+    // Generate a pattern with multiple colors
     for (int y = 0; y < ENEMY_HEIGHT; y++) {
         for (int x = 0; x < ENEMY_WIDTH; x++) {
-            Uint32 color;
+            Uint32 color = 0x00000000; // Transparent by default
             
-            // Create a circle pattern
-            float centerX = ENEMY_WIDTH / 2.0f;
-            float centerY = ENEMY_HEIGHT / 2.0f;
-            float dx = x - centerX;
-            float dy = y - centerY;
-            float distance = sqrtf(dx * dx + dy * dy);
+            // Calculate normalized coordinates from center (-1 to 1)
+            float nx = (x - ENEMY_WIDTH/2.0f) / (ENEMY_WIDTH/2.0f);
+            float ny = (y - ENEMY_HEIGHT/2.0f) / (ENEMY_HEIGHT/2.0f);
+            float dist = sqrtf(nx*nx + ny*ny);
             
-            if (distance < ENEMY_WIDTH / 3) {
-                // Core of the enemy
-                color = 0xFFFF0000; // Red
-            } else if (distance < ENEMY_WIDTH / 2) {
-                // Outer ring
-                color = 0xFF000000; // Black
-            } else {
-                // Transparent background
-                color = 0x00000000;
+            // Create a layered circular pattern
+            if (dist < 0.8f) {
+                if (dist < 0.3f) {
+                    // Core - bright red
+                    color = 0xFFFF0000;
+                } else if (dist < 0.5f) {
+                    // Inner ring - dark red
+                    color = 0xFF800000;
+                } else if (dist < 0.65f) {
+                    // Outer ring - black
+                    color = 0xFF000000;
+                } else {
+                    // Edge fade - semi-transparent black
+                    float alpha = (0.8f - dist) / 0.15f;
+                    Uint8 a = (Uint8)(alpha * 255);
+                    color = (a << 24);
+                }
             }
             
             texture->pixels[y * ENEMY_WIDTH + x] = color;
@@ -172,7 +178,9 @@ void render_enemies(Graphics* gfx, const Player* player) {
                     
                     if (texX >= 0 && texX < ENEMY_WIDTH && texY >= 0 && texY < ENEMY_HEIGHT) {
                         Uint32 color = enemies[i].texture.pixels[ENEMY_WIDTH * texY + texX];
-                        if ((color & 0xFF000000) != 0) { // Only draw non-transparent pixels
+                        if ((color & 0xFF000000) != 0 && 
+                            y >= 0 && y < SCREEN_HEIGHT && 
+                            stripe >= 0 && stripe < SCREEN_WIDTH) { 
                             gfx->pixels[y * SCREEN_WIDTH + stripe] = color;
                         }
                     }

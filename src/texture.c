@@ -8,7 +8,8 @@ TextureInfo floor_texture = {0};
 TextureInfo ceiling_texture = {0};
 
 int validate_texture(const TextureInfo* tex) {
-    return tex && tex->pixels && tex->width == TEX_WIDTH && tex->height == TEX_HEIGHT;
+    if (!tex || !tex->texture) return 0;
+    return tex->pixels && tex->width == TEX_WIDTH && tex->height == TEX_HEIGHT;
 }
 
 SDL_Surface* load_and_format_texture(const char* path) {

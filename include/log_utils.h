@@ -4,6 +4,26 @@
 // Include for size_t type definition used in string operations
 #include <stddef.h>
 
+// Module identifiers for logging
+#define LOG_MODULE_SYSTEM    "[System]"
+#define LOG_MODULE_SDL       "[SDL]"
+#define LOG_MODULE_GRAPHICS  "[Graphics]"
+#define LOG_MODULE_TEXTURE   "[Texture]"
+#define LOG_MODULE_MAP       "[Map]"
+#define LOG_MODULE_ENEMY     "[Enemy]"
+#define LOG_MODULE_PLAYER    "[Player]"
+#define LOG_MODULE_INPUT    "[Input]"
+#define LOG_MODULE_CONFIG   "[Config]"
+#define LOG_MODULE_RENDER   "[Render]"
+#define LOG_MODULE_ASSET    "[Asset]"
+#define LOG_MODULE_RESOURCE "[Resource]"
+
+// Log sections for better organization
+#define LOG_SECTION_INIT     "INITIALIZATION"
+#define LOG_SECTION_GAME     "GAME LOOP"
+#define LOG_SECTION_SHUTDOWN "SHUTDOWN SEQUENCE"
+#define LOG_SECTION_ERROR    "ERROR"
+
 // Global array to store the log file name
 // Size of 64 characters allows for reasonable file path length
 // 'extern' keyword makes this variable accessible from other source files
@@ -25,6 +45,12 @@ void log_error(const char *filename, const char *message);
 // Parameters:
 //   filename - name of the file where the separator is logged
 //   phase    - the game phase to be logged
-void log_separator(const char* filename, const char* phase);
+void log_separator(const char* section, const char* subsection);
+
+// New function to log messages with module identifier
+// Parameters:
+//   module  - the module identifier for the log message
+//   message  - the message to be logged
+void log_message(const char *module, const char *message);
 
 #endif

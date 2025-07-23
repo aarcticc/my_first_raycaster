@@ -120,46 +120,50 @@ void render_frame(Graphics *gfx, Player *player, int map[MAP_HEIGHT][MAP_WIDTH])
 
         // Calculate height of line to draw on screen
         int lineHeight = (int)(SCREEN_HEIGHT / perpWallDist);
-        
+        if (lineHeight <= 0) lineHeight = 1; // Prevent division by zero
+
         // Calculate lowest and highest pixel to fill in current stripe
         int drawStart = -lineHeight / 2 + SCREEN_HEIGHT / 2;
         if (drawStart < 0) drawStart = 0;
         int drawEnd = lineHeight / 2 + SCREEN_HEIGHT / 2;
         if (drawEnd >= SCREEN_HEIGHT) drawEnd = SCREEN_HEIGHT - 1;
 
-        // TEXTURE MAPPING CALCULATIONS
+        // Calculate texture coordinates
+        float wallX;  // Where exactly the wall was hit
+        if (side == 0) wallX = player->y + perpWallDist * rayDirY;
+        else wallX = player->x + perpWallDist * rayDirX;
+        wallX -= floor(wallX);
+
+        // x coordinate on the texture
+        int texX = (int)(wallX * (float)TEX_WIDTH);
+        if (side == 0 && rayDirX > 0) texX = TEX_WIDTH - texX - 1;
+        if (side == 1 && rayDirY < 0) texX = TEX_WIDTH - texX - 1;
+
+        // Get wall texture ID (subtract 1 since walls start at 1 in map)
         int tex_id = map[mapY][mapX] - 1;
-        if (tex_id >= 0 && tex_id < NUM_WALL_TEXTURES && validate_texture(&wall_textures[tex_id])) {
-            float wallX;
-            if (side == 0) wallX = player->y + perpWallDist * rayDirY;
-            else wallX = player->x + perpWallDist * rayDirX;
-            wallX -= floorf(wallX);
-
-            int texX = (int)(wallX * TEX_WIDTH);
-            if ((side == 0 && rayDirX > 0) || (side == 1 && rayDirY < 0))
-                texX = TEX_WIDTH - texX - 1;
-
-            float step = (float)TEX_HEIGHT / lineHeight;
-            float texPos = (drawStart - SCREEN_HEIGHT / 2 + lineHeight / 2) * step;
+        if (tex_id < 0) tex_id = 0;
+        if (tex_id >= NUM_WALL_TEXTURES) tex_id = NUM_WALL_TEXTURES - 1;
+        
+        float step = (float)TEX_HEIGHT / lineHeight;
+        float texPos = (drawStart - SCREEN_HEIGHT / 2 + lineHeight / 2) * step;
+        
+        // Draw the vertical line pixel by pixel
+        for(int y = drawStart; y < drawEnd; y++) {
+            int texY = (int)texPos & (TEX_HEIGHT - 1);
+            texPos += step;
             
-            // Draw the vertical line pixel by pixel
-            for(int y = drawStart; y < drawEnd; y++) {
-                int texY = (int)texPos & (TEX_HEIGHT - 1);
-                texPos += step;
+            int texIndex = texY * TEX_WIDTH + texX;
+            if (texIndex >= 0 && texIndex < TEX_WIDTH * TEX_HEIGHT) {
+                Uint32 color = wall_textures[tex_id].pixels[texIndex];
                 
-                int texIndex = texY * TEX_WIDTH + texX;
-                if (texIndex >= 0 && texIndex < TEX_WIDTH * TEX_HEIGHT) {
-                    Uint32 color = wall_textures[tex_id].pixels[texIndex];
-                    
-                    if(side == 1) {
-                        Uint8 r = ((color >> 16) & 0xFF) * 0.7;
-                        Uint8 g = ((color >> 8) & 0xFF) * 0.7;
-                        Uint8 b = (color & 0xFF) * 0.7;
-                        color = (0xFF << 24) | (r << 16) | (g << 8) | b;
-                    }
-                    
-                    gfx->pixels[y * SCREEN_WIDTH + x] = color;
+                if(side == 1) {
+                    Uint8 r = ((color >> 16) & 0xFF) * 0.7;
+                    Uint8 g = ((color >> 8) & 0xFF) * 0.7;
+                    Uint8 b = (color & 0xFF) * 0.7;
+                    color = (0xFF << 24) | (r << 16) | (g << 8) | b;
                 }
+                
+                gfx->pixels[y * SCREEN_WIDTH + x] = color;
             }
         }
     }
@@ -179,7 +183,6 @@ void handle_input(Player *player, const Uint8 *keystate, int map[MAP_HEIGHT][MAP
     if (keystate[SDL_SCANCODE_UP]) {
         newX = player->x + player->dirX * MOVE_SPEED;
         newY = player->y + player->dirY * MOVE_SPEED;
-        // Only move if new position is not in a wall
         if (map[(int)newY][(int)player->x] == 0) player->y = newY;
         if (map[(int)player->y][(int)newX] == 0) player->x = newX;
     }

@@ -5,12 +5,35 @@
 #ifdef _OPENMP
 #include <omp.h>
 #endif
+#include <sys/stat.h>
+#include <unistd.h>
 
 int main(void) {
     // Initialize log file name
     get_log_filename(log_file, sizeof(log_file));
     log_separator(log_file, "GAME INITIALIZATION");
     
+    // Check if maps directory exists
+    struct stat st = {0};
+    if (stat("maps", &st) == -1) {
+        mkdir("maps", 0700);
+        log_error(log_file, "[System] Created maps directory");
+    }
+    
+    // Check if mapmaker is available
+    if (access("tools/mapmaker.py", X_OK) == -1) {
+        log_error(log_file, "[System] Warning: Mapmaker tool not found or not executable");
+    } else {
+        log_error(log_file, "[System] Mapmaker tool available");
+    }
+
+    // Try to load custom map
+    if (load_custom_map("maps/custom_map.json") != 0) {
+        log_error(log_file, "[Map] Using default map due to loading failure");
+    } else {
+        log_error(log_file, "[Map] Custom map loaded successfully");
+    }
+
     // Log OpenMP status
     #ifdef _OPENMP
         log_error(log_file, "[System] OpenMP enabled");
@@ -51,6 +74,7 @@ int main(void) {
     // Initialize enemies after textures are loaded
     if (init_enemies(gfx.renderer) != 0) {
         log_error(log_file, "[Enemies] Failed to initialize");
+        destroy_enemies();
         destroy_textures();
         shutdown_graphics(&gfx);
         SDL_Quit();

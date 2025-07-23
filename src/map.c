@@ -1,5 +1,9 @@
 #include "map.h"
+#include "log_utils.h"
 #include <math.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 /* Map representation:
    0 = Empty space (corridor)
@@ -73,4 +77,71 @@ void find_nearest_empty_space(float* x, float* y) {
 
     *x = bestX;
     *y = bestY;
+}
+
+int load_custom_map(const char* filename) {
+    FILE* file = fopen(filename, "r");
+    if (!file) {
+        char error_msg[256];
+        snprintf(error_msg, sizeof(error_msg), 
+                "[Map] Failed to open map file: %s", filename);
+        log_error(log_file, error_msg);
+        return 1;
+    }
+
+    log_error(log_file, "[Map] Starting to parse map file");
+    
+    char buffer[1024];
+    int in_grid = 0;
+    int row = 0;
+
+    while (fgets(buffer, sizeof(buffer), file)) {
+        if (strstr(buffer, "\"grid\":")) {
+            in_grid = 1;
+            continue;
+        }
+
+        if (in_grid) {
+            if (strstr(buffer, "]")) {
+                break;
+            }
+
+            // Parse grid row
+            char* token = strtok(buffer, "[ ,]\n");
+            int col = 0;
+            
+            while (token && col < MAP_WIDTH) {
+                if (*token >= '0' && *token <= '9') {  // Valid number
+                    map[row][col] = atoi(token);
+                    col++;
+                }
+                token = strtok(NULL, "[ ,]\n");
+            }
+            
+            row++;
+            if (row >= MAP_HEIGHT) break;
+        }
+    }
+
+    fclose(file);
+    
+    // Add logging for map validation
+    log_error(log_file, "[Map] Validating map borders");
+    
+    // Validate map borders
+    for (int x = 0; x < MAP_WIDTH; x++) {
+        if (map[0][x] == 0 || map[MAP_HEIGHT-1][x] == 0) {
+            log_error(log_file, "[Map] Invalid map: horizontal borders must be solid walls");
+            return 1;
+        }
+    }
+    for (int y = 0; y < MAP_HEIGHT; y++) {
+        if (map[y][0] == 0 || map[y][MAP_WIDTH-1] == 0) {
+            log_error(log_file, "[Map] Invalid map: vertical borders must be solid walls");
+            return 1;
+        }
+    }
+
+    log_error(log_file, "[Map] Map validation successful");
+    return 0;
 }

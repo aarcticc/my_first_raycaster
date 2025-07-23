@@ -21,4 +21,7 @@ void find_nearest_empty_space(float* x, float* y);
 // Function to validate spawn position
 int is_valid_position(float x, float y);
 
+// Load a custom map from a JSON file
+int load_custom_map(const char* filename);
+
 #endif  // End of header guard

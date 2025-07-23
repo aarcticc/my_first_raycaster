@@ -1,6 +1,7 @@
-// Include necessary headers for file operations and time functions
+#include "log_utils.h"
 #include <stdio.h>
 #include <time.h>
+#include <string.h>
 
 // Global definition of log_file
 char log_file[64];
@@ -22,11 +23,11 @@ void get_log_filename(char *buffer, size_t size) {
              t->tm_hour, t->tm_min);
 }
 
-// Function to append error messages to a log file with timestamp
-void log_error(const char *filename, const char *message) {
+// Function to log a message with module information
+void log_message(const char *module, const char *message) {
     // Open file in append mode ("a")
     // This creates the file if it doesn't exist
-    FILE *fp = fopen(filename, "a");
+    FILE *fp = fopen(log_file, "a");
     if (!fp) return;  // Return silently if file can't be opened
 
     // Get current time for the log entry
@@ -34,26 +35,41 @@ void log_error(const char *filename, const char *message) {
     struct tm *t = localtime(&now);
 
     // Write timestamped message to file
-    // Format: [HH:MM:SS] error_message
-    fprintf(fp, "[%02d:%02d:%02d] %s\n",
-            t->tm_hour, t->tm_min, t->tm_sec, message);
+    // Format: [HH:MM:SS] module_name message
+    fprintf(fp, "[%02d:%02d:%02d] %s %s\n",
+            t->tm_hour, t->tm_min, t->tm_sec, 
+            module ? module : "", message);
 
     // Close file to save changes and free resources
     fclose(fp);
 }
 
-// Function to log a separator line with the current phase
-void log_separator(const char* filename, const char* phase) {
+// Function to log a separator line with section and subsection
+void log_separator(const char* section, const char* subsection) {
     // Open file in append mode ("a")
     // This creates the file if it doesn't exist
-    FILE *fp = fopen(filename, "a");
+    FILE *fp = fopen(log_file, "a");
     if (!fp) return;  // Return silently if file can't be opened
 
-    // Write separator lines and phase information
+    // Write separator lines and section/subsection information
     fprintf(fp, "\n%s\n", "===========================================");
-    fprintf(fp, "              %s              \n", phase);
+    
+    if (section && subsection) {
+        // If both section and subsection are provided, print them
+        fprintf(fp, "    %s - %s\n", section, subsection);
+    } else if (section) {
+        // If only section is provided, print it
+        fprintf(fp, "            %s\n", section);
+    }
+    
     fprintf(fp, "%s\n\n", "===========================================");
 
     // Close file to save changes and free resources
     fclose(fp);
+}
+
+// Function to log an error message (backward compatibility)
+void log_error(const char *filename __attribute__((unused)), const char *message) {
+    // Call log_message with NULL module for backward compatibility
+    log_message(NULL, message);
 }
