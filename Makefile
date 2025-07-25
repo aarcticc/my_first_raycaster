@@ -70,5 +70,16 @@ check-assets:
 	@test -f $(ASSETS_DIR)/ceiling.png || (echo "Error: ceiling.png missing"; exit 1)
 	@echo "All assets OK"
 
-# Add assets check to main build
-all: check-assets
+# Add map importer tool setup
+.PHONY: import-map
+import-map:
+	@echo "Checking Python for map importer..."
+	@python3 -c "import re, sys" 2>/dev/null || (echo "Error: Python 3 with re module required"; exit 1)
+	@if [ ! -f $(TOOLS_DIR)/map_importer.py ]; then \
+		echo "Error: map_importer.py not found. Creating..."; \
+		cp tools/map_importer.py $(TOOLS_DIR)/map_importer.py 2>/dev/null || \
+		echo "#!/usr/bin/env python3" > $(TOOLS_DIR)/map_importer.py && \
+		cat tools/map_importer.py >> $(TOOLS_DIR)/map_importer.py; \
+	fi
+	@chmod +x $(TOOLS_DIR)/map_importer.py
+	@echo "Map importer tool ready"

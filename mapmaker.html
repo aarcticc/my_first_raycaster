@@ -1,0 +1,969 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced Raycaster Map Editor</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 20px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+            font-size: 2.5em;
+        }
+
+        .editor-layout {
+            display: grid;
+            grid-template-columns: 1fr 300px;
+            gap: 20px;
+        }
+
+        .main-editor {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sidebar {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 15px;
+            backdrop-filter: blur(5px);
+        }
+
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 20px;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .control-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 10px 15px;
+            border-radius: 10px;
+            backdrop-filter: blur(5px);
+        }
+
+        input, select, button {
+            padding: 8px 12px;
+            border: none;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+
+        input, select {
+            background: rgba(255, 255, 255, 0.9);
+            color: #333;
+        }
+
+        button {
+            background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: bold;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .tool-palette {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .tool-btn {
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.2);
+            border: 2px solid transparent;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+            font-size: 12px;
+        }
+
+        .tool-btn.active {
+            border-color: #ff6b6b;
+            background: rgba(255, 107, 107, 0.3);
+        }
+
+        .tool-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .texture-preview {
+            width: 30px;
+            height: 30px;
+            margin: 0 auto 5px;
+            border-radius: 4px;
+        }
+
+        .map-container {
+            display: flex;
+            justify-content: center;
+            margin: 20px 0;
+        }
+
+        .map-grid {
+            display: inline-grid;
+            gap: 1px;
+            background-color: #333;
+            border: 3px solid #fff;
+            border-radius: 10px;
+            padding: 10px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+        }
+
+        .cell {
+            width: 25px;
+            height: 25px;
+            cursor: pointer;
+            border: 1px solid #666;
+            transition: all 0.1s ease;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .cell:hover {
+            transform: scale(1.1);
+            z-index: 10;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+        }
+
+        /* Texturen */
+        .cell.empty { background: linear-gradient(45deg, #ffffff, #ecf0f1); color: #333; }
+        .cell.wall1 { background: linear-gradient(45deg, #8b4513, #a0522d); color: white; }
+        .cell.wall2 { background: linear-gradient(45deg, #696969, #808080); color: white; }
+        .cell.wall3 { background: linear-gradient(45deg, #2e8b57, #3cb371); color: white; }
+        .cell.wall4 { background: linear-gradient(45deg, #4682b4, #5f9ea0); color: white; }
+
+        /* Feinde */
+        .enemy-marker {
+            position: absolute;
+            top: 2px;
+            right: 2px;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            border: 1px solid #fff;
+        }
+
+        .enemy-guard { background: #ff4757; }
+        .enemy-patrol { background: #ffa502; }
+        .enemy-boss { background: #8e44ad; }
+
+        .output {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+            backdrop-filter: blur(5px);
+        }
+
+        .code-output {
+            background: #1a1a1a;
+            color: #00ff00;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 11px;
+            overflow-x: auto;
+            white-space: pre;
+            border: 1px solid #333;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .legend {
+            margin-bottom: 20px;
+        }
+
+        .legend h4 {
+            margin: 0 0 10px 0;
+            font-size: 14px;
+            color: #ffd700;
+        }
+
+        .legend-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 5px;
+            font-size: 11px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 5px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 5px;
+        }
+
+        .legend-color {
+            width: 15px;
+            height: 15px;
+            border-radius: 3px;
+            border: 1px solid #fff;
+            flex-shrink: 0;
+        }
+
+        .enemy-list {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            padding: 10px;
+            margin-top: 15px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .enemy-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 5px;
+            margin: 2px 0;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+            font-size: 11px;
+        }
+
+        .enemy-remove {
+            background: #e74c3c;
+            color: white;
+            border: none;
+            padding: 2px 6px;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 10px;
+        }
+
+        .stats {
+            margin-top: 15px;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            font-size: 12px;
+        }
+
+        .instructions {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 20px;
+            text-align: center;
+            font-size: 14px;
+        }
+
+        @media (max-width: 1200px) {
+            .editor-layout {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎮 Advanced Raycaster Map Editor</h1>
+        
+        <div class="instructions">
+            <strong>Erweiterte Funktionen:</strong> Nutzen Sie verschiedene Wandtexturen (1-4) und platzieren Sie Feinde! 
+            Linksklick platziert, Rechtsklick entfernt. Der Code ist kompatibel mit Ihrem C-Projekt.
+        </div>
+
+        <div class="controls">
+            <div class="control-group">
+                <label>Breite:</label>
+                <input type="number" id="width" value="16" min="5" max="50">
+            </div>
+            <div class="control-group">
+                <label>Höhe:</label>
+                <input type="number" id="height" value="16" min="5" max="50">
+            </div>
+            <div class="control-group">
+                <button onclick="createMap()">Neue Map</button>
+                <button onclick="clearMap()">Alles leeren</button>
+                <button onclick="fillBorder()">Rand füllen</button>
+            </div>
+            <div class="control-group">
+                <label>Vorlagen:</label>
+                <select id="templates" onchange="loadTemplate()">
+                    <option value="">-- Vorlage wählen --</option>
+                    <option value="empty">Leere Map</option>
+                    <option value="bordered">Mit Rand</option>
+                    <option value="maze">Labyrinth</option>
+                    <option value="rooms">Räume</option>
+                    <option value="arena">Arena</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="editor-layout">
+            <div class="main-editor">
+                <div class="map-container">
+                    <div id="mapGrid" class="map-grid"></div>
+                </div>
+
+                <div class="output">
+                    <h3>📋 Generierter C-Code:</h3>
+                    <div class="code-output" id="codeOutput"></div>
+                    <button onclick="copyToClipboard()" style="margin-top: 10px;">📋 Code kopieren</button>
+                    <div style="margin-top: 10px;">
+                        <label style="margin-right: 10px;">
+                            <input type="checkbox" id="includeEnemies" checked> Feinde-Code einschließen
+                        </label>
+                        <label>
+                            <input type="checkbox" id="includeTextures" checked> Erweiterte Texturen
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="sidebar">
+                <h4>🛠️ Werkzeuge</h4>
+                <div class="tool-palette">
+                    <div class="tool-btn active" data-tool="0" onclick="selectTool(0)">
+                        <div class="texture-preview" style="background: linear-gradient(45deg, #ffffff, #ecf0f1);"></div>
+                        Leer (0)
+                    </div>
+                    <div class="tool-btn" data-tool="1" onclick="selectTool(1)">
+                        <div class="texture-preview" style="background: linear-gradient(45deg, #8b4513, #a0522d);"></div>
+                        Holz (1)
+                    </div>
+                    <div class="tool-btn" data-tool="2" onclick="selectTool(2)">
+                        <div class="texture-preview" style="background: linear-gradient(45deg, #696969, #808080);"></div>
+                        Stein (2)
+                    </div>
+                    <div class="tool-btn" data-tool="3" onclick="selectTool(3)">
+                        <div class="texture-preview" style="background: linear-gradient(45deg, #2e8b57, #3cb371);"></div>
+                        Moos (3)
+                    </div>
+                    <div class="tool-btn" data-tool="4" onclick="selectTool(4)">
+                        <div class="texture-preview" style="background: linear-gradient(45deg, #4682b4, #5f9ea0);"></div>
+                        Metall (4)
+                    </div>
+                    <div class="tool-btn" data-tool="enemy_guard" onclick="selectTool('enemy_guard')">
+                        <div class="texture-preview enemy-guard"></div>
+                        Wächter
+                    </div>
+                    <div class="tool-btn" data-tool="enemy_patrol" onclick="selectTool('enemy_patrol')">
+                        <div class="texture-preview enemy-patrol"></div>
+                        Patrouille
+                    </div>
+                    <div class="tool-btn" data-tool="enemy_boss" onclick="selectTool('enemy_boss')">
+                        <div class="texture-preview enemy-boss"></div>
+                        Boss
+                    </div>
+                </div>
+
+                <div class="legend">
+                    <h4>📖 Legende - Texturen</h4>
+                    <div class="legend-grid">
+                        <div class="legend-item">
+                            <div class="legend-color" style="background: linear-gradient(45deg, #ffffff, #ecf0f1);"></div>
+                            <span>Leer (0)</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color" style="background: linear-gradient(45deg, #8b4513, #a0522d);"></div>
+                            <span>Holz (1)</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color" style="background: linear-gradient(45deg, #696969, #808080);"></div>
+                            <span>Stein (2)</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color" style="background: linear-gradient(45deg, #2e8b57, #3cb371);"></div>
+                            <span>Moos (3)</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color" style="background: linear-gradient(45deg, #4682b4, #5f9ea0);"></div>
+                            <span>Metall (4)</span>
+                        </div>
+                    </div>
+
+                    <h4 style="margin-top: 15px;">👹 Feinde</h4>
+                    <div class="legend-grid">
+                        <div class="legend-item">
+                            <div class="legend-color enemy-guard"></div>
+                            <span>Wächter</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color enemy-patrol"></div>
+                            <span>Patrouille</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color enemy-boss"></div>
+                            <span>Boss</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="stats">
+                    <h4>📊 Statistiken</h4>
+                    <div id="stats"></div>
+                </div>
+
+                <div class="enemy-list">
+                    <h4>👹 Feinde-Liste</h4>
+                    <div id="enemyList"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let mapData = [];
+        let enemies = [];
+        let mapWidth = 16;
+        let mapHeight = 16;
+        let currentTool = 0;
+
+        function initializeMap() {
+            mapData = [];
+            enemies = [];
+            for (let y = 0; y < mapHeight; y++) {
+                mapData[y] = [];
+                for (let x = 0; x < mapWidth; x++) {
+                    mapData[y][x] = 0;
+                }
+            }
+        }
+
+        function selectTool(tool) {
+            currentTool = tool;
+            document.querySelectorAll('.tool-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelector(`[data-tool="${tool}"]`).classList.add('active');
+        }
+
+        function createMap() {
+            mapWidth = parseInt(document.getElementById('width').value);
+            mapHeight = parseInt(document.getElementById('height').value);
+            
+            if (mapWidth < 5 || mapWidth > 50 || mapHeight < 5 || mapHeight > 50) {
+                alert('Breite und Höhe müssen zwischen 5 und 50 liegen!');
+                return;
+            }
+
+            initializeMap();
+            renderMap();
+            generateCode();
+            updateStats();
+            updateEnemyList();
+        }
+
+        function renderMap() {
+            const grid = document.getElementById('mapGrid');
+            grid.style.gridTemplateColumns = `repeat(${mapWidth}, 1fr)`;
+            grid.innerHTML = '';
+
+            for (let y = 0; y < mapHeight; y++) {
+                for (let x = 0; x < mapWidth; x++) {
+                    const cell = document.createElement('div');
+                    const cellValue = mapData[y][x];
+                    
+                    cell.className = `cell ${getCellClass(cellValue)}`;
+                    cell.onclick = (e) => handleCellClick(x, y, e);
+                    cell.oncontextmenu = (e) => handleCellRightClick(x, y, e);
+                    cell.title = `Position: (${x}, ${y}) - Wert: ${cellValue}`;
+                    
+                    // Feinde anzeigen
+                    const enemy = enemies.find(e => e.x === x && e.y === y);
+                    if (enemy) {
+                        const marker = document.createElement('div');
+                        marker.className = `enemy-marker enemy-${enemy.type}`;
+                        marker.title = `${enemy.type} - HP: ${enemy.health}`;
+                        cell.appendChild(marker);
+                    }
+                    
+                    grid.appendChild(cell);
+                }
+            }
+        }
+
+        function getCellClass(value) {
+            switch(value) {
+                case 0: return 'empty';
+                case 1: return 'wall1';
+                case 2: return 'wall2';  
+                case 3: return 'wall3';
+                case 4: return 'wall4';
+                default: return 'empty';
+            }
+        }
+
+        function handleCellClick(x, y, e) {
+            e.preventDefault();
+            
+            if (typeof currentTool === 'string' && currentTool.startsWith('enemy_')) {
+                const enemyType = currentTool.replace('enemy_', '');
+                placeEnemy(x, y, enemyType);
+            } else {
+                mapData[y][x] = currentTool;
+            }
+            
+            renderMap();
+            generateCode();
+            updateStats();
+            updateEnemyList();
+        }
+
+        function handleCellRightClick(x, y, e) {
+            e.preventDefault();
+            
+            // Feind entfernen
+            const enemyIndex = enemies.findIndex(enemy => enemy.x === x && enemy.y === y);
+            if (enemyIndex !== -1) {
+                enemies.splice(enemyIndex, 1);
+            } else {
+                // Zelle leeren
+                mapData[y][x] = 0;
+            }
+            
+            renderMap();
+            generateCode();
+            updateStats();
+            updateEnemyList();
+        }
+
+        function placeEnemy(x, y, type) {
+            // Nicht auf Wänden platzieren
+            if (mapData[y][x] !== 0) {
+                alert('Feinde können nur auf leeren Feldern platziert werden!');
+                return;
+            }
+            
+            // Bestehenden Feind ersetzen oder neuen hinzufügen
+            const existingIndex = enemies.findIndex(e => e.x === x && e.y === y);
+            const newEnemy = {
+                x: x,
+                y: y,
+                type: type,
+                health: type === 'boss' ? 100 : type === 'patrol' ? 50 : 25,
+                id: Date.now() + Math.random()
+            };
+            
+            if (existingIndex !== -1) {
+                enemies[existingIndex] = newEnemy;
+            } else {
+                enemies.push(newEnemy);
+            }
+        }
+
+        function removeEnemy(id) {
+            enemies = enemies.filter(e => e.id !== id);
+            renderMap();
+            generateCode();
+            updateStats();
+            updateEnemyList();
+        }
+
+        function clearMap() {
+            initializeMap();
+            renderMap();
+            generateCode();
+            updateStats();
+            updateEnemyList();
+        }
+
+        function fillBorder() {
+            const borderTexture = 1; // Holzwände für Rand
+            
+            for (let x = 0; x < mapWidth; x++) {
+                mapData[0][x] = borderTexture;
+                mapData[mapHeight - 1][x] = borderTexture;
+            }
+            
+            for (let y = 0; y < mapHeight; y++) {
+                mapData[y][0] = borderTexture;
+                mapData[y][mapWidth - 1] = borderTexture;
+            }
+            
+            renderMap();
+            generateCode();
+            updateStats();
+        }
+
+        function loadTemplate() {
+            const template = document.getElementById('templates').value;
+            
+            switch (template) {
+                case 'empty':
+                    clearMap();
+                    break;
+                    
+                case 'bordered':
+                    clearMap();
+                    fillBorder();
+                    break;
+                    
+                case 'maze':
+                    clearMap();
+                    fillBorder();
+                    // Labyrinth mit verschiedenen Texturen
+                    for (let y = 2; y < mapHeight - 2; y += 2) {
+                        for (let x = 2; x < mapWidth - 2; x += 2) {
+                            const texture = Math.floor(Math.random() * 4) + 1;
+                            mapData[y][x] = texture;
+                            if (Math.random() < 0.5 && x + 1 < mapWidth - 1) {
+                                mapData[y][x + 1] = texture;
+                            }
+                            if (Math.random() < 0.5 && y + 1 < mapHeight - 1) {
+                                mapData[y + 1][x] = texture;
+                            }
+                        }
+                    }
+                    // Feinde hinzufügen
+                    for (let i = 0; i < 3; i++) {
+                        let x, y;
+                        do {
+                            x = Math.floor(Math.random() * mapWidth);
+                            y = Math.floor(Math.random() * mapHeight);
+                        } while (mapData[y][x] !== 0);
+                        placeEnemy(x, y, 'guard');
+                    }
+                    break;
+                    
+                case 'rooms':
+                    clearMap();
+                    fillBorder();
+                    // Räume mit verschiedenen Materialien
+                    const roomSize = Math.floor(Math.min(mapWidth, mapHeight) / 3);
+                    let roomTexture = 1;
+                    for (let y = roomSize; y < mapHeight - roomSize; y += roomSize) {
+                        for (let x = roomSize; x < mapWidth - roomSize; x += roomSize) {
+                            for (let ry = y - 1; ry <= y + 1; ry++) {
+                                for (let rx = x - 1; rx <= x + 1; rx++) {
+                                    if (ry >= 0 && ry < mapHeight && rx >= 0 && rx < mapWidth) {
+                                        if (ry === y - 1 || ry === y + 1 || rx === x - 1 || rx === x + 1) {
+                                            mapData[ry][rx] = roomTexture;
+                                        }
+                                    }
+                                }
+                            }
+                            roomTexture = (roomTexture % 4) + 1;
+                        }
+                    }
+                    break;
+
+                case 'arena':
+                    clearMap();
+                    // Arena mit Boss in der Mitte
+                    fillBorder();
+                    // Innere Wände
+                    for (let i = 3; i < mapWidth - 3; i++) {
+                        mapData[3][i] = 2;
+                        mapData[mapHeight - 4][i] = 2;
+                    }
+                    for (let i = 3; i < mapHeight - 3; i++) {
+                        mapData[i][3] = 2;
+                        mapData[i][mapWidth - 4] = 2;
+                    }
+                    // Boss in der Mitte
+                    const centerX = Math.floor(mapWidth / 2);
+                    const centerY = Math.floor(mapHeight / 2);
+                    placeEnemy(centerX, centerY, 'boss');
+                    // Wächter an den Ecken
+                    placeEnemy(5, 5, 'guard');
+                    placeEnemy(mapWidth - 6, 5, 'guard');
+                    placeEnemy(5, mapHeight - 6, 'guard');
+                    placeEnemy(mapWidth - 6, mapHeight - 6, 'guard');
+                    break;
+            }
+            
+            renderMap();
+            generateCode();
+            updateStats();
+            updateEnemyList();
+            document.getElementById('templates').value = '';
+        }
+
+        function updateStats() {
+            const stats = {
+                empty: 0,
+                wall1: 0,
+                wall2: 0,
+                wall3: 0,
+                wall4: 0,
+                guards: 0,
+                patrols: 0,
+                bosses: 0
+            };
+
+            // Map-Statistiken
+            for (let y = 0; y < mapHeight; y++) {
+                for (let x = 0; x < mapWidth; x++) {
+                    const value = mapData[y][x];
+                    switch(value) {
+                        case 0: stats.empty++; break;
+                        case 1: stats.wall1++; break;
+                        case 2: stats.wall2++; break;
+                        case 3: stats.wall3++; break;
+                        case 4: stats.wall4++; break;
+                    }
+                }
+            }
+
+            // Feind-Statistiken
+            enemies.forEach(enemy => {
+                switch(enemy.type) {
+                    case 'guard': stats.guards++; break;
+                    case 'patrol': stats.patrols++; break;
+                    case 'boss': stats.bosses++; break;
+                }
+            });
+
+            document.getElementById('stats').innerHTML = `
+                <div>Leere Felder: ${stats.empty}</div>
+                <div>Holzwände: ${stats.wall1}</div>
+                <div>Steinwände: ${stats.wall2}</div>
+                <div>Mooswände: ${stats.wall3}</div>
+                <div>Metallwände: ${stats.wall4}</div>
+                <div>Wächter: ${stats.guards}</div>
+                <div>Patrouillen: ${stats.patrols}</div>
+                <div>Bosse: ${stats.bosses}</div>
+                <div><strong>Gesamt: ${mapWidth * mapHeight} Zellen</strong></div>
+            `;
+        }
+
+        function updateEnemyList() {
+            const list = document.getElementById('enemyList');
+            if (enemies.length === 0) {
+                list.innerHTML = '<div style="color: #999; font-style: italic;">Keine Feinde platziert</div>';
+                return;
+            }
+
+            list.innerHTML = enemies.map(enemy => `
+                <div class="enemy-item">
+                    <span>${enemy.type} (${enemy.x}, ${enemy.y}) HP:${enemy.health}</span>
+                    <button class="enemy-remove" onclick="removeEnemy(${enemy.id})">×</button>
+                </div>
+            `).join('');
+        }
+
+        function generateCode() {
+            const includeEnemies = document.getElementById('includeEnemies').checked;
+            const includeTextures = document.getElementById('includeTextures').checked;
+            
+            let code = `// ===== RAYCASTER MAP & ENEMIES =====\n`;
+            code += `// Generiert für: ${mapWidth}x${mapHeight} Map\n`;
+            code += `// Datum: ${new Date().toLocaleDateString('de-DE')}\n\n`;
+            
+            // Header-Definitionen
+            code += `// === MAP.H ===\n`;
+            code += `#define MAP_WIDTH ${mapWidth}\n`;
+            code += `#define MAP_HEIGHT ${mapHeight}\n\n`;
+            
+            if (includeTextures) {
+                code += `// Textur-Definitionen\n`;
+                code += `#define TEXTURE_EMPTY  0\n`;
+                code += `#define TEXTURE_WOOD   1  // texture1.bmp\n`;
+                code += `#define TEXTURE_STONE  2  // texture2.bmp\n`;
+                code += `#define TEXTURE_MOSS   3  // texture3.bmp\n`;
+                code += `#define TEXTURE_METAL  4  // texture4.bmp\n\n`;
+            }
+            
+            if (includeEnemies && enemies.length > 0) {
+                code += `// Feind-Definitionen\n`;
+                code += `#define MAX_ENEMIES ${enemies.length}\n`;
+                code += `typedef enum {\n`;
+                code += `    ENEMY_GUARD,\n`;
+                code += `    ENEMY_PATROL,\n`;
+                code += `    ENEMY_BOSS\n`;
+                code += `} EnemyType;\n\n`;
+                code += `typedef struct {\n`;
+                code += `    float x, y;           // Position\n`;
+                code += `    EnemyType type;       // Feindtyp\n`;
+                code += `    int health;           // Lebenspunkte\n`;
+                code += `    int alive;            // Status\n`;
+                code += `    float angle;          // Blickrichtung\n`;
+                code += `} Enemy;\n\n`;
+            }
+            
+            // Map-Array
+            code += `// === MAP.C ===\n`;
+            code += `int map[MAP_HEIGHT][MAP_WIDTH] = {\n`;
+            
+            for (let y = 0; y < mapHeight; y++) {
+                code += '    {';
+                for (let x = 0; x < mapWidth; x++) {
+                    code += mapData[y][x];
+                    if (x < mapWidth - 1) code += ',';
+                }
+                code += '}';
+                if (y < mapHeight - 1) code += ',';
+                code += '\n';
+            }
+            code += '};\n\n';
+            
+            // Feinde-Array
+            if (includeEnemies && enemies.length > 0) {
+                code += `// Feinde-Array\n`;
+                code += `Enemy enemies[MAX_ENEMIES] = {\n`;
+                
+                enemies.forEach((enemy, index) => {
+                    const typeMap = {
+                        'guard': 'ENEMY_GUARD',
+                        'patrol': 'ENEMY_PATROL', 
+                        'boss': 'ENEMY_BOSS'
+                    };
+                    
+                    code += `    {${enemy.x}.0f, ${enemy.y}.0f, ${typeMap[enemy.type]}, ${enemy.health}, 1, 0.0f}`;
+                    if (index < enemies.length - 1) code += ',';
+                    code += `  // ${enemy.type} bei (${enemy.x}, ${enemy.y})\n`;
+                });
+                
+                code += `};\n\n`;
+                
+                // Hilfsfunktionen für Feinde
+                code += `// === ENEMY.C (Neue Datei) ===\n`;
+                code += `#include "enemy.h"\n`;
+                code += `#include <math.h>\n\n`;
+                code += `// Feind initialisieren\n`;
+                code += `void init_enemies() {\n`;
+                code += `    for (int i = 0; i < MAX_ENEMIES; i++) {\n`;
+                code += `        enemies[i].angle = (float)(rand() % 360) * M_PI / 180.0f;\n`;
+                code += `    }\n`;
+                code += `}\n\n`;
+                code += `// Feinde updaten\n`;
+                code += `void update_enemies(float deltaTime) {\n`;
+                code += `    for (int i = 0; i < MAX_ENEMIES; i++) {\n`;
+                code += `        if (!enemies[i].alive) continue;\n`;
+                code += `        \n`;
+                code += `        switch (enemies[i].type) {\n`;
+                code += `            case ENEMY_PATROL:\n`;
+                code += `                // Einfache Patrol-Logik\n`;
+                code += `                enemies[i].angle += 0.5f * deltaTime;\n`;
+                code += `                break;\n`;
+                code += `            case ENEMY_GUARD:\n`;
+                code += `                // Wächter bleiben statisch\n`;
+                code += `                break;\n`;
+                code += `            case ENEMY_BOSS:\n`;
+                code += `                // Boss-spezifische Logik\n`;
+                code += `                enemies[i].angle += 0.2f * deltaTime;\n`;
+                code += `                break;\n`;
+                code += `        }\n`;
+                code += `    }\n`;
+                code += `}\n\n`;
+                code += `// Feind Schaden zufügen\n`;
+                code += `void damage_enemy(int enemyIndex, int damage) {\n`;
+                code += `    if (enemyIndex >= 0 && enemyIndex < MAX_ENEMIES) {\n`;
+                code += `        enemies[enemyIndex].health -= damage;\n`;
+                code += `        if (enemies[enemyIndex].health <= 0) {\n`;
+                code += `            enemies[enemyIndex].alive = 0;\n`;
+                code += `        }\n`;
+                code += `    }\n`;
+                code += `}\n\n`;
+            }
+            
+            if (includeTextures) {
+                code += `// === TEXTURE LOADING (Erweitert) ===\n`;
+                code += `// Fügen Sie diese Funktion zu Ihrem bestehenden Code hinzu:\n`;
+                code += `void load_textures() {\n`;
+                code += `    // Laden Sie die 4 Texturen aus Ihrem Repository\n`;
+                code += `    load_texture(&textures[1], "textures/texture1.bmp");  // Holz\n`;
+                code += `    load_texture(&textures[2], "textures/texture2.bmp");  // Stein\n`;
+                code += `    load_texture(&textures[3], "textures/texture3.bmp");  // Moos\n`;
+                code += `    load_texture(&textures[4], "textures/texture4.bmp");  // Metall\n`;
+                code += `}\n\n`;
+                code += `// Erweiterte Textur-Auswahl im Raycasting:\n`;
+                code += `int get_wall_texture(int wallValue) {\n`;
+                code += `    return (wallValue >= 1 && wallValue <= 4) ? wallValue : 1;\n`;
+                code += `}\n\n`;
+            }
+            
+            // Integration-Hinweise
+            code += `// === INTEGRATION HINWEISE ===\n`;
+            code += `// 1. Kopieren Sie die Map-Daten in Ihre map.c\n`;
+            code += `// 2. Aktualisieren Sie MAP_WIDTH und MAP_HEIGHT in map.h\n`;
+            if (includeEnemies && enemies.length > 0) {
+                code += `// 3. Erstellen Sie enemy.h und enemy.c für Feinde-System\n`;
+                code += `// 4. Rufen Sie init_enemies() beim Spielstart auf\n`;
+                code += `// 5. Rufen Sie update_enemies(deltaTime) im Game-Loop auf\n`;
+            }
+            if (includeTextures) {
+                code += `// 6. Erweitern Sie Ihr Textur-System für 4 verschiedene Wand-Typen\n`;
+                code += `// 7. Modifizieren Sie draw_scene() um verschiedene Texturen zu verwenden\n`;
+            }
+            
+            // Statistiken
+            const wallCount = mapData.flat().filter(cell => cell > 0).length;
+            const emptyCount = mapData.flat().filter(cell => cell === 0).length;
+            
+            code += `\n// === STATISTIKEN ===\n`;
+            code += `// Map-Größe: ${mapWidth}x${mapHeight} = ${mapWidth * mapHeight} Zellen\n`;
+            code += `// Wände: ${wallCount}, Leere Räume: ${emptyCount}\n`;
+            if (includeEnemies) {
+                code += `// Feinde: ${enemies.length}\n`;
+                const enemyTypes = ['guard', 'patrol', 'boss'];
+                enemyTypes.forEach(type => {
+                    const count = enemies.filter(e => e.type === type).length;
+                    if (count > 0) code += `//   ${type}: ${count}\n`;
+                });
+            }
+            
+            document.getElementById('codeOutput').textContent = code;
+        }
+
+        function copyToClipboard() {
+            const codeOutput = document.getElementById('codeOutput');
+            const textArea = document.createElement('textarea');
+            textArea.value = codeOutput.textContent;
+            document.body.appendChild(textArea);
+            textArea.select();
+            document.execCommand('copy');
+            document.body.removeChild(textArea);
+            
+            const button = event.target;
+            const originalText = button.textContent;
+            button.textContent = '✅ Kopiert!';
+            button.style.background = 'linear-gradient(45deg, #00b894, #00cec9)';
+            setTimeout(() => {
+                button.textContent = originalText;
+                button.style.background = 'linear-gradient(45deg, #ff6b6b, #ee5a24)';
+            }, 2000);
+        }
+
+        // Event-Listener für Checkboxen
+        document.getElementById('includeEnemies').addEventListener('change', generateCode);
+        document.getElementById('includeTextures').addEventListener('change', generateCode);
+
+        // Initialisierung beim Laden der Seite
+        window.onload = function() {
+            createMap();
+        };
+    </script>
+</body>
+</html>
