@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="de">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -300,34 +300,34 @@
         <h1>🎮 Advanced Raycaster Map Editor</h1>
         
         <div class="instructions">
-            <strong>Erweiterte Funktionen:</strong> Nutzen Sie verschiedene Wandtexturen (1-4) und platzieren Sie Feinde! 
-            Linksklick platziert, Rechtsklick entfernt. Der Code ist kompatibel mit Ihrem C-Projekt.
+            <strong>Advanced Features:</strong> Use different wall textures (1-4) and place enemies! 
+            Left click to place, right click to remove. The code is compatible with your C project.
         </div>
 
         <div class="controls">
             <div class="control-group">
-                <label>Breite:</label>
+                <label>Width:</label>
                 <input type="number" id="width" value="16" min="5" max="50">
             </div>
             <div class="control-group">
-                <label>Höhe:</label>
+                <label>Height:</label>
                 <input type="number" id="height" value="16" min="5" max="50">
             </div>
             <div class="control-group">
-                <button onclick="createMap()">Neue Map</button>
-                <button onclick="clearMap()">Alles leeren</button>
-                <button onclick="fillBorder()">Rand füllen</button>
-                <button onclick="saveMapJSON()">Als JSON speichern</button>
-                <button onclick="previewJSON()">JSON Vorschau</button>
+                <button onclick="createMap()">New Map</button>
+                <button onclick="clearMap()">Clear All</button>
+                <button onclick="fillBorder()">Fill Border</button>
+                <button onclick="saveMapJSON()">Save as JSON</button>
+                <button onclick="previewJSON()">JSON Preview</button>
             </div>
             <div class="control-group">
-                <label>Vorlagen:</label>
+                <label>Templates:</label>
                 <select id="templates" onchange="loadTemplate()">
-                    <option value="">-- Vorlage wählen --</option>
-                    <option value="empty">Leere Map</option>
-                    <option value="bordered">Mit Rand</option>
-                    <option value="maze">Labyrinth</option>
-                    <option value="rooms">Räume</option>
+                    <option value="">-- Select Template --</option>
+                    <option value="empty">Empty Map</option>
+                    <option value="bordered">With Border</option>
+                    <option value="maze">Maze</option>
+                    <option value="rooms">Rooms</option>
                     <option value="arena">Arena</option>
                 </select>
             </div>
@@ -340,7 +340,7 @@
                 </div>
 
                 <div class="output">
-                    <h3>📋 Generierter C-Code:</h3>
+                    <h3>📋 Generierter Code:</h3>
                     <div class="code-output" id="codeOutput"></div>
                     <button onclick="copyToClipboard()" style="margin-top: 10px;">📋 Code kopieren</button>
                     <div style="margin-top: 10px;">
@@ -363,23 +363,23 @@
                     </div>
                     <div class="tool-btn" data-tool="1" onclick="selectTool(1)">
                         <div class="texture-preview" style="background: linear-gradient(45deg, #8b4513, #a0522d);"></div>
-                        Holz (1)
+                        Wall 1
                     </div>
                     <div class="tool-btn" data-tool="2" onclick="selectTool(2)">
                         <div class="texture-preview" style="background: linear-gradient(45deg, #696969, #808080);"></div>
-                        Stein (2)
+                        Wall 2
                     </div>
                     <div class="tool-btn" data-tool="3" onclick="selectTool(3)">
                         <div class="texture-preview" style="background: linear-gradient(45deg, #2e8b57, #3cb371);"></div>
-                        Moos (3)
+                        Wall 3
                     </div>
                     <div class="tool-btn" data-tool="4" onclick="selectTool(4)">
                         <div class="texture-preview" style="background: linear-gradient(45deg, #4682b4, #5f9ea0);"></div>
-                        Metall (4)
+                        Wall 4
                     </div>
                     <div class="tool-btn" data-tool="enemy_guard" onclick="selectTool('enemy_guard')">
                         <div class="texture-preview enemy-guard"></div>
-                        Wächter
+                        Guard
                     </div>
                     <div class="tool-btn" data-tool="enemy_patrol" onclick="selectTool('enemy_patrol')">
                         <div class="texture-preview enemy-patrol"></div>
@@ -392,39 +392,39 @@
                 </div>
 
                 <div class="legend">
-                    <h4>📖 Legende - Texturen</h4>
+                    <h4>📖 Legend - Textures</h4>
                     <div class="legend-grid">
                         <div class="legend-item">
                             <div class="legend-color" style="background: linear-gradient(45deg, #ffffff, #ecf0f1);"></div>
-                            <span>Leer (0)</span>
+                            <span>Empty (0)</span>
                         </div>
                         <div class="legend-item">
                             <div class="legend-color" style="background: linear-gradient(45deg, #8b4513, #a0522d);"></div>
-                            <span>Holz (1)</span>
+                            <span>Wood (1)</span>
                         </div>
                         <div class="legend-item">
                             <div class="legend-color" style="background: linear-gradient(45deg, #696969, #808080);"></div>
-                            <span>Stein (2)</span>
+                            <span>Stone (2)</span>
                         </div>
                         <div class="legend-item">
                             <div class="legend-color" style="background: linear-gradient(45deg, #2e8b57, #3cb371);"></div>
-                            <span>Moos (3)</span>
+                            <span>Moss (3)</span>
                         </div>
                         <div class="legend-item">
                             <div class="legend-color" style="background: linear-gradient(45deg, #4682b4, #5f9ea0);"></div>
-                            <span>Metall (4)</span>
+                            <span>Metal (4)</span>
                         </div>
                     </div>
 
-                    <h4 style="margin-top: 15px;">👹 Feinde</h4>
+                    <h4 style="margin-top: 15px;">👹 Enemies</h4>
                     <div class="legend-grid">
                         <div class="legend-item">
                             <div class="legend-color enemy-guard"></div>
-                            <span>Wächter</span>
+                            <span>Guard</span>
                         </div>
                         <div class="legend-item">
                             <div class="legend-color enemy-patrol"></div>
-                            <span>Patrouille</span>
+                            <span>Patrol</span>
                         </div>
                         <div class="legend-item">
                             <div class="legend-color enemy-boss"></div>
@@ -434,12 +434,12 @@
                 </div>
 
                 <div class="stats">
-                    <h4>📊 Statistiken</h4>
+                    <h4>📊 Statistics</h4>
                     <div id="stats"></div>
                 </div>
 
                 <div class="enemy-list">
-                    <h4>👹 Feinde-Liste</h4>
+                    <h4>👹 Enemy List</h4>
                     <div id="enemyList"></div>
                 </div>
             </div>
@@ -748,22 +748,22 @@
             });
 
             document.getElementById('stats').innerHTML = `
-                <div>Leere Felder: ${stats.empty}</div>
-                <div>Holzwände: ${stats.wall1}</div>
-                <div>Steinwände: ${stats.wall2}</div>
-                <div>Mooswände: ${stats.wall3}</div>
-                <div>Metallwände: ${stats.wall4}</div>
-                <div>Wächter: ${stats.guards}</div>
-                <div>Patrouillen: ${stats.patrols}</div>
-                <div>Bosse: ${stats.bosses}</div>
-                <div><strong>Gesamt: ${mapWidth * mapHeight} Zellen</strong></div>
+                <div>Empty Cells: ${stats.empty}</div>
+                <div>Wooden Walls: ${stats.wall1}</div>
+                <div>Stone Walls: ${stats.wall2}</div>
+                <div>Moss Walls: ${stats.wall3}</div>
+                <div>Metal Walls: ${stats.wall4}</div>
+                <div>Guards: ${stats.guards}</div>
+                <div>Patrols: ${stats.patrols}</div>
+                <div>Bosses: ${stats.bosses}</div>
+                <div><strong>Total: ${mapWidth * mapHeight} Cells</strong></div>
             `;
         }
 
         function updateEnemyList() {
             const list = document.getElementById('enemyList');
             if (enemies.length === 0) {
-                list.innerHTML = '<div style="color: #999; font-style: italic;">Keine Feinde platziert</div>';
+                list.innerHTML = '<div style="color: #999; font-style: italic;">No enemies placed</div>';
                 return;
             }
 
