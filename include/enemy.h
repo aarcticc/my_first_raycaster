@@ -6,19 +6,28 @@
 #include "raycaster.h"  // Added for Player and Graphics types
 #include "map.h"        // Added for MAP_WIDTH and MAP_HEIGHT
 
-#define MAX_ENEMIES 10
+#define MAX_ENEMIES 3  // Changed from 10 to match map.txt
 #define ENEMY_WIDTH 32
 #define ENEMY_HEIGHT 32
 #define ENEMY_SPEED 0.03f
 #define ENEMY_CATCH_DISTANCE 1.0f
 #define ENEMY_MOVE_DELAY 16  // milliseconds between moves
 
+typedef enum {
+    ENEMY_GUARD,
+    ENEMY_PATROL,
+    ENEMY_BOSS
+} EnemyType;
+
 typedef struct {
-    float x, y;          // Enemy position
-    TextureInfo texture; // Enemy texture
+    float x, y;           // Position
+    TextureInfo texture;  // Enemy texture
+    EnemyType type;      // Enemy type
+    int health;          // Health points
     int active;          // Whether enemy is alive
-    float dirX, dirY;     // Direction vector
-    Uint32 lastMoveTime;  // Time of last movement
+    float angle;         // View direction
+    float dirX, dirY;    // Direction vector
+    Uint32 lastMoveTime; // Time of last movement
 } Enemy;
 
 extern Enemy enemies[MAX_ENEMIES];

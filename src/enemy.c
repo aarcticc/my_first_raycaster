@@ -3,22 +3,36 @@
 #include <stdlib.h>
 #include <math.h>
 
-Enemy enemies[MAX_ENEMIES] = {0};
+Enemy enemies[MAX_ENEMIES] = {
+    {1.0f, 9.0f, {0}, ENEMY_GUARD, 25, 1, 0.0f, 0.0f, 0.0f, 0},  // guard at (1, 9)
+    {1.0f, 2.0f, {0}, ENEMY_GUARD, 25, 1, 0.0f, 0.0f, 0.0f, 0},  // guard at (1, 2)
+    {7.0f, 8.0f, {0}, ENEMY_GUARD, 25, 1, 0.0f, 0.0f, 0.0f, 0}   // guard at (7, 8)
+};
 
 int init_enemies(SDL_Renderer* renderer) {
     log_error(log_file, "[Enemies] Initializing enemy system");
     
     for (int i = 0; i < MAX_ENEMIES; i++) {
-        enemies[i].active = 0;
-        enemies[i].x = 0;
-        enemies[i].y = 0;
+        // Keep existing position and type from predefined array
+        float origX = enemies[i].x;
+        float origY = enemies[i].y;
+        EnemyType origType = enemies[i].type;
+        int origHealth = enemies[i].health;
         
-        // Generate unique texture for each enemy
+        // Generate texture
         if (create_empty_texture(renderer, &enemies[i].texture, ENEMY_WIDTH, ENEMY_HEIGHT) != 0) {
             log_error(log_file, "[Enemies] Failed to create enemy texture");
             return 1;
         }
         generate_enemy_texture(renderer, &enemies[i].texture);
+        
+        // Restore original values
+        enemies[i].x = origX;
+        enemies[i].y = origY;
+        enemies[i].type = origType;
+        enemies[i].health = origHealth;
+        enemies[i].active = 1;
+        enemies[i].angle = (float)(rand() % 360) * M_PI / 180.0f;
     }
     
     log_error(log_file, "[Enemies] Enemy system initialized successfully");
