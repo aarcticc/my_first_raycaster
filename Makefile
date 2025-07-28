@@ -1,6 +1,6 @@
 CC = gcc
-CFLAGS = -Wall -Wextra -Werror -std=c99 -O2 -Iinclude -fopenmp -g
-LDFLAGS = -lSDL2 -lSDL2_image -lm -fopenmp -ljson-c
+CFLAGS = -Wall -Wextra -Werror -std=c99 -O2 -Iinclude -fopenmp -g -D_USE_MATH_DEFINES
+LDFLAGS = -lSDL2 -lSDL2_image -lm -fopenmp
 
 # Source files and object files
 SRC_DIR = src
@@ -35,19 +35,12 @@ $(BIN): $(OBJ)
 	$(CC) -o $@ $^ $(LDFLAGS)
 
 $(BIN_DIR)/%.o: $(SRC_DIR)/%.c
-	$(CC) $(CFLAGS) -c $< -o $@
-
-mapmaker:
-	@echo "Checking Python and required modules..."
-	@python3 -c "import tkinter" 2>/dev/null || (echo "Error: tkinter module not found. Install with: sudo apt-get install python3-tk"; exit 1)
-	@if [ ! -f $(TOOLS_DIR)/mapmaker.py ]; then \
-		echo "Error: mapmaker.py not found. Creating default mapmaker..."; \
-		cp tools/mapmaker.py $(TOOLS_DIR)/mapmaker.py 2>/dev/null || \
-		echo "#!/usr/bin/env python3" > $(TOOLS_DIR)/mapmaker.py && \
-		cat tools/mapmaker.py >> $(TOOLS_DIR)/mapmaker.py; \
-	fi
-	@chmod +x $(TOOLS_DIR)/mapmaker.py
-	@echo "Mapmaker tool ready"
+	@echo "Compiling $<..."
+	@$(CC) $(CFLAGS) -c $< -o $@ || \
+	(echo "\033[1;31mError compiling $<\033[0m" && \
+	echo "Command: $(CC) $(CFLAGS) -c $< -o $@" && \
+	$(CC) $(CFLAGS) -c $< -o $@ 2>&1 && exit 1)
+	@echo "\033[1;32mSuccessfully compiled $<\033[0m"
 
 run: $(BIN)
 	./$(BIN)
@@ -69,17 +62,3 @@ check-assets:
 	@test -f $(ASSETS_DIR)/floor.png || (echo "Error: floor.png missing"; exit 1)
 	@test -f $(ASSETS_DIR)/ceiling.png || (echo "Error: ceiling.png missing"; exit 1)
 	@echo "All assets OK"
-
-# Add map importer tool setup
-.PHONY: import-map
-import-map:
-	@echo "Checking Python for map importer..."
-	@python3 -c "import re, sys" 2>/dev/null || (echo "Error: Python 3 with re module required"; exit 1)
-	@if [ ! -f $(TOOLS_DIR)/map_importer.py ]; then \
-		echo "Error: map_importer.py not found. Creating..."; \
-		cp tools/map_importer.py $(TOOLS_DIR)/map_importer.py 2>/dev/null || \
-		echo "#!/usr/bin/env python3" > $(TOOLS_DIR)/map_importer.py && \
-		cat tools/map_importer.py >> $(TOOLS_DIR)/map_importer.py; \
-	fi
-	@chmod +x $(TOOLS_DIR)/map_importer.py
-	@echo "Map importer tool ready"
