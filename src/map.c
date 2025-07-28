@@ -1,9 +1,11 @@
 #include "map.h"
 #include "log_utils.h"
+#include "enemy.h"
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <json-c/json.h>
 
 /* Map representation:
    0 = Empty space (corridor)
@@ -76,68 +78,84 @@ void find_nearest_empty_space(float* x, float* y) {
 }
 
 int load_custom_map(const char* filename) {
-    FILE* file = fopen(filename, "r");
-    if (!file) {
-        char error_msg[256];
-        snprintf(error_msg, sizeof(error_msg), 
-                "[Map] Failed to open map file: %s", filename);
-        log_error(log_file, error_msg);
+    json_object *root;
+    json_object *grid, *enemies_array;
+    
+    root = json_object_from_file(filename);
+    if (!root) {
+        log_error(log_file, "[Map] Failed to parse JSON file");
         return 1;
     }
 
-    log_error(log_file, "[Map] Starting to parse map file");
-    
-    char buffer[1024];
-    int in_grid = 0;
-    int row = 0;
-
-    while (fgets(buffer, sizeof(buffer), file)) {
-        if (strstr(buffer, "\"grid\":")) {
-            in_grid = 1;
-            continue;
-        }
-
-        if (in_grid) {
-            if (strstr(buffer, "]")) {
-                break;
-            }
-
-            // Parse grid row
-            char* token = strtok(buffer, "[ ,]\n");
-            int col = 0;
-            
-            while (token && col < MAP_WIDTH) {
-                if (*token >= '0' && *token <= '9') {  // Valid number
-                    map[row][col] = atoi(token);
-                    col++;
-                }
-                token = strtok(NULL, "[ ,]\n");
-            }
-            
-            row++;
-            if (row >= MAP_HEIGHT) break;
-        }
-    }
-
-    fclose(file);
-    
-    // Add logging for map validation
-    log_error(log_file, "[Map] Validating map borders");
-    
-    // Validate map borders
-    for (int x = 0; x < MAP_WIDTH; x++) {
-        if (map[0][x] == 0 || map[MAP_HEIGHT-1][x] == 0) {
-            log_error(log_file, "[Map] Invalid map: horizontal borders must be solid walls");
+    // Get and validate dimensions
+    json_object *width_obj, *height_obj;
+    if (json_object_object_get_ex(root, "width", &width_obj) &&
+        json_object_object_get_ex(root, "height", &height_obj)) {
+        int width = json_object_get_int(width_obj);
+        int height = json_object_get_int(height_obj);
+        if (width != MAP_WIDTH || height != MAP_HEIGHT) {
+            log_error(log_file, "[Map] Map dimensions mismatch");
+            json_object_put(root);
             return 1;
         }
     }
+
+    // Get the grid array
+    if (!json_object_object_get_ex(root, "grid", &grid)) {
+        log_error(log_file, "[Map] No grid found in JSON");
+        json_object_put(root);
+        return 1;
+    }
+
+    // Load the map grid
     for (int y = 0; y < MAP_HEIGHT; y++) {
-        if (map[y][0] == 0 || map[y][MAP_WIDTH-1] == 0) {
-            log_error(log_file, "[Map] Invalid map: vertical borders must be solid walls");
-            return 1;
+        json_object *row = json_object_array_get_idx(grid, y);
+        if (!row) continue;
+        
+        for (int x = 0; x < MAP_WIDTH; x++) {
+            json_object *cell = json_object_array_get_idx(row, x);
+            if (!cell) continue;
+            map[y][x] = json_object_get_int(cell);
         }
     }
 
-    log_error(log_file, "[Map] Map validation successful");
+    // Reset existing enemies
+    for (int i = 0; i < MAX_ENEMIES; i++) {
+        enemies[i].active = 0;
+    }
+
+    // Load enemies if present
+    if (json_object_object_get_ex(root, "enemies", &enemies_array)) {
+        int enemy_count = json_object_array_length(enemies_array);
+        enemy_count = enemy_count < MAX_ENEMIES ? enemy_count : MAX_ENEMIES;
+
+        for (int i = 0; i < enemy_count; i++) {
+            json_object *enemy = json_object_array_get_idx(enemies_array, i);
+            json_object *x, *y, *type, *health;
+
+            if (json_object_object_get_ex(enemy, "x", &x) &&
+                json_object_object_get_ex(enemy, "y", &y) &&
+                json_object_object_get_ex(enemy, "type", &type) &&
+                json_object_object_get_ex(enemy, "health", &health)) {
+
+                // Get enemy type string and convert to enum
+                const char* type_str = json_object_get_string(type);
+                EnemyType enemy_type = ENEMY_GUARD; // default
+                if (strcmp(type_str, "patrol") == 0) enemy_type = ENEMY_PATROL;
+                if (strcmp(type_str, "boss") == 0) enemy_type = ENEMY_BOSS;
+
+                // Set enemy properties
+                enemies[i].x = json_object_get_double(x);
+                enemies[i].y = json_object_get_double(y);
+                enemies[i].type = enemy_type;
+                enemies[i].health = json_object_get_int(health);
+                enemies[i].active = 1;
+                enemies[i].angle = (float)(rand() % 360) * M_PI / 180.0f;
+            }
+        }
+        log_error(log_file, "[Map] Enemies loaded from JSON");
+    }
+
+    json_object_put(root);
     return 0;
 }

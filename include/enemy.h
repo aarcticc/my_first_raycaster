@@ -1,6 +1,10 @@
 #ifndef ENEMY_H
 #define ENEMY_H
 
+#ifndef M_PI
+#define M_PI 3.14159265358979323846
+#endif
+
 #include <SDL2/SDL.h>
 #include "texture.h"
 #include "raycaster.h"  // Added for Player and Graphics types

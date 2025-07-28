@@ -19,19 +19,29 @@ int main(void) {
         mkdir("maps", 0700);
         log_error(log_file, "[System] Created maps directory");
     }
+
+    // Try to load map files in order of preference
+    const char* map_files[] = {
+        "maps/custom_map.json",
+        "maps/latest_map.json",
+        "maps/default.json"
+    };
     
-    // Check if mapmaker is available
-    if (access("tools/mapmaker.py", X_OK) == -1) {
-        log_error(log_file, "[System] Warning: Mapmaker tool not found or not executable");
-    } else {
-        log_error(log_file, "[System] Mapmaker tool available");
+    int map_loaded = 0;
+    for (size_t i = 0; i < sizeof(map_files) / sizeof(map_files[0]); i++) {
+        if (access(map_files[i], F_OK) != -1) {
+            if (load_custom_map(map_files[i]) == 0) {
+                char msg[128];
+                snprintf(msg, sizeof(msg), "[Map] Successfully loaded %s", map_files[i]);
+                log_error(log_file, msg);
+                map_loaded = 1;
+                break;
+            }
+        }
     }
 
-    // Try to load custom map
-    if (load_custom_map("maps/custom_map.json") != 0) {
-        log_error(log_file, "[Map] Using default map due to loading failure");
-    } else {
-        log_error(log_file, "[Map] Custom map loaded successfully");
+    if (!map_loaded) {
+        log_error(log_file, "[Map] Using default built-in map");
     }
 
     // Log OpenMP status

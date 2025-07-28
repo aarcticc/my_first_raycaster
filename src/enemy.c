@@ -1,8 +1,3 @@
-#define _USE_MATH_DEFINES
-#ifndef M_PI
-#define M_PI 3.14159265358979323846
-#endif
-
 #include "enemy.h"
 #include "log_utils.h"
 #include <stdlib.h>
@@ -45,7 +40,11 @@ int init_enemies(SDL_Renderer* renderer) {
 }
 
 void generate_enemy_texture(SDL_Renderer* renderer __attribute__((unused)), TextureInfo* texture) {
-    // Generate a pattern with multiple colors
+    // Get enemy type from the offset in the enemies array
+    int enemy_index = ((uintptr_t)texture - (uintptr_t)&enemies[0].texture) / sizeof(Enemy);
+    EnemyType type = enemies[enemy_index].type;
+
+    // Generate texture based on enemy type
     for (int y = 0; y < ENEMY_HEIGHT; y++) {
         for (int x = 0; x < ENEMY_WIDTH; x++) {
             Uint32 color = 0x00000000; // Transparent by default
@@ -55,23 +54,55 @@ void generate_enemy_texture(SDL_Renderer* renderer __attribute__((unused)), Text
             float ny = (y - ENEMY_HEIGHT/2.0f) / (ENEMY_HEIGHT/2.0f);
             float dist = sqrtf(nx*nx + ny*ny);
             
-            // Create a layered circular pattern
-            if (dist < 0.8f) {
-                if (dist < 0.3f) {
-                    // Core - bright red
-                    color = 0xFFFF0000;
-                } else if (dist < 0.5f) {
-                    // Inner ring - dark red
-                    color = 0xFF800000;
-                } else if (dist < 0.65f) {
-                    // Outer ring - black
-                    color = 0xFF000000;
-                } else {
-                    // Edge fade - semi-transparent black
-                    float alpha = (0.8f - dist) / 0.15f;
-                    Uint8 a = (Uint8)(alpha * 255);
-                    color = (a << 24);
-                }
+            switch (type) {
+                case ENEMY_GUARD:
+                    // Simple red circular guard
+                    if (dist < 0.8f) {
+                        if (dist < 0.3f) {
+                            color = 0xFFFF0000;  // Bright red core
+                        } else if (dist < 0.5f) {
+                            color = 0xFF800000;  // Dark red middle
+                        } else {
+                            float alpha = (0.8f - dist) / 0.3f;
+                            Uint8 a = (Uint8)(alpha * 255);
+                            color = (a << 24) | 0x00400000;  // Fading edge
+                        }
+                    }
+                    break;
+
+                case ENEMY_PATROL:
+                    // Yellow pulsing patrol with pattern
+                    if (dist < 0.8f) {
+                        float angle = atan2f(ny, nx);
+                        float pattern = sinf(angle * 8) * 0.2f;
+                        if (dist + pattern < 0.7f) {
+                            if (dist < 0.3f) {
+                                color = 0xFFFFD700;  // Gold core
+                            } else {
+                                color = 0xFFFFAA00;  // Orange outer
+                            }
+                        }
+                    }
+                    break;
+
+                case ENEMY_BOSS:
+                    // Purple boss with spiky pattern
+                    if (dist < 0.9f) {
+                        float angle = atan2f(ny, nx);
+                        float spikes = 0.2f * sinf(angle * 6);
+                        if (dist + spikes < 0.8f) {
+                            if (dist < 0.4f) {
+                                color = 0xFF8B008B;  // Dark magenta core
+                            } else if (dist < 0.6f) {
+                                color = 0xFF4B0082;  // Indigo middle
+                            } else {
+                                float alpha = (0.8f - dist) / 0.2f;
+                                Uint8 a = (Uint8)(alpha * 255);
+                                color = (a << 24) | 0x00800080;  // Purple edge
+                            }
+                        }
+                    }
+                    break;
             }
             
             texture->pixels[y * ENEMY_WIDTH + x] = color;

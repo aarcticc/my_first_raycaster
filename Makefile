@@ -1,12 +1,11 @@
 CC = gcc
 CFLAGS = -Wall -Wextra -Werror -std=c99 -O2 -Iinclude -fopenmp -g -D_USE_MATH_DEFINES
-LDFLAGS = -lSDL2 -lSDL2_image -lm -fopenmp
+LDFLAGS = -lSDL2 -lSDL2_image -lm -fopenmp -ljson-c
 
 # Source files and object files
 SRC_DIR = src
 BIN_DIR = bin
 MAPS_DIR = maps
-TOOLS_DIR = tools
 ASSETS_DIR = assets
 
 SRC = $(wildcard $(SRC_DIR)/*.c)
@@ -16,9 +15,35 @@ BIN = raycaster
 # Directories
 REQUIRED_DIRS = $(BIN_DIR) $(MAPS_DIR) $(ASSETS_DIR)
 
-.PHONY: all clean run dirs mapmaker check-deps
+.PHONY: all clean deep-clean run dirs check-deps load-map check-assets
 
-all: check-deps dirs $(BIN) mapmaker
+all: check-deps dirs $(BIN)
+
+# Add map loading target
+load-map:
+	@echo "Checking for maps directory..."
+	@mkdir -p $(MAPS_DIR)
+	@if [ -f "$(MAPS_DIR)/custom_map.json" ]; then \
+		echo "Found custom map, ready to load"; \
+	else \
+		echo "No custom map found in $(MAPS_DIR)/"; \
+		echo "Please save a map from the mapmaker first"; \
+	fi
+
+# Modify run target to accept map file
+run: $(BIN)
+	@if [ -n "$(MAP)" ]; then \
+		if [ -f "$(MAP)" ]; then \
+			cp "$(MAP)" "$(MAPS_DIR)/custom_map.json"; \
+			echo "Loading map: $(MAP)"; \
+			./$(BIN); \
+		else \
+			echo "Error: Map file $(MAP) not found"; \
+			exit 1; \
+		fi \
+	else \
+		./$(BIN); \
+	fi
 
 check-deps:
 	@echo "Checking dependencies..."
@@ -29,7 +54,6 @@ check-deps:
 
 dirs:
 	@mkdir -p $(REQUIRED_DIRS)
-	@mkdir -p $(TOOLS_DIR)
 
 $(BIN): $(OBJ)
 	$(CC) -o $@ $^ $(LDFLAGS)
@@ -42,15 +66,6 @@ $(BIN_DIR)/%.o: $(SRC_DIR)/%.c
 	$(CC) $(CFLAGS) -c $< -o $@ 2>&1 && exit 1)
 	@echo "\033[1;32mSuccessfully compiled $<\033[0m"
 
-run: $(BIN)
-	./$(BIN)
-
-clean:
-	rm -f $(OBJ) $(BIN)
-	rm -rf $(BIN_DIR)
-	rm -f log_*.txt
-	rm -rf $(MAPS_DIR)/*
-
 # Assets directory check target
 .PHONY: check-assets
 check-assets:
@@ -62,3 +77,20 @@ check-assets:
 	@test -f $(ASSETS_DIR)/floor.png || (echo "Error: floor.png missing"; exit 1)
 	@test -f $(ASSETS_DIR)/ceiling.png || (echo "Error: ceiling.png missing"; exit 1)
 	@echo "All assets OK"
+
+.PHONY: clean deep-clean
+
+clean:
+	@echo "Cleaning build files..."
+	@rm -f $(OBJ) $(BIN)
+	@rm -rf $(BIN_DIR)
+	@rm -f log_*.txt
+	@echo "Clean complete"
+
+deep-clean: clean
+	@echo "Deep cleaning..."
+	@rm -rf $(MAPS_DIR)/*.json
+	@echo "Map files removed"
+	@echo "Deep clean complete"
+	@echo "Map files removed"
+	@echo "Deep clean complete"

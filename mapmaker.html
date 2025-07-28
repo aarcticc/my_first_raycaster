@@ -317,6 +317,8 @@
                 <button onclick="createMap()">Neue Map</button>
                 <button onclick="clearMap()">Alles leeren</button>
                 <button onclick="fillBorder()">Rand füllen</button>
+                <button onclick="saveMapJSON()">Als JSON speichern</button>
+                <button onclick="previewJSON()">JSON Vorschau</button>
             </div>
             <div class="control-group">
                 <label>Vorlagen:</label>
@@ -937,23 +939,56 @@
             document.getElementById('codeOutput').textContent = code;
         }
 
-        function copyToClipboard() {
-            const codeOutput = document.getElementById('codeOutput');
-            const textArea = document.createElement('textarea');
-            textArea.value = codeOutput.textContent;
-            document.body.appendChild(textArea);
-            textArea.select();
-            document.execCommand('copy');
-            document.body.removeChild(textArea);
+        function generateJSON() {
+            // Convert enemy type from guard/patrol/boss to enum strings
+            const typeMap = {
+                'guard': 'ENEMY_GUARD',
+                'patrol': 'ENEMY_PATROL',
+                'boss': 'ENEMY_BOSS'
+            };
+
+            const mapObject = {
+                width: mapWidth,
+                height: mapHeight,
+                grid: mapData,
+                enemies: enemies.map(enemy => ({
+                    x: enemy.x + 0.5,  // Center in cell
+                    y: enemy.y + 0.5,  // Center in cell
+                    type: enemy.type,   // Keep string format for readability
+                    health: enemy.health,
+                    active: 1,          // Set initially active
+                    angle: 0.0         // Initial angle
+                }))
+            };
+            return JSON.stringify(mapObject, null, 2);
+        }
+
+        function saveMapJSON() {
+            const jsonContent = generateJSON();
+            const blob = new Blob([jsonContent], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
             
-            const button = event.target;
-            const originalText = button.textContent;
-            button.textContent = '✅ Kopiert!';
-            button.style.background = 'linear-gradient(45deg, #00b894, #00cec9)';
-            setTimeout(() => {
-                button.textContent = originalText;
-                button.style.background = 'linear-gradient(45deg, #ff6b6b, #ee5a24)';
-            }, 2000);
+            // Save with timestamp to avoid overwriting
+            const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+            link.download = `map_${timestamp}.json`;
+            
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+
+            // Also offer preview
+            const codeOutput = document.getElementById('codeOutput');
+            codeOutput.textContent = jsonContent;
+        }
+
+        // Add JSON preview function
+        function previewJSON() {
+            const jsonContent = generateJSON();
+            const codeOutput = document.getElementById('codeOutput');
+            codeOutput.textContent = jsonContent;
         }
 
         // Event-Listener für Checkboxen
