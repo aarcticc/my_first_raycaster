@@ -52,6 +52,7 @@ typedef struct {
     float x, y;          // Player's position in 2D space
     float dirX, dirY;    // Direction vector - where player is looking
     float planeX, planeY; // Camera plane - used for raycasting field of view
+    float perpWallDist[SCREEN_WIDTH]; // Add z-buffer for sprite rendering
 } Player;
 
 // Graphics structure containing SDL rendering components

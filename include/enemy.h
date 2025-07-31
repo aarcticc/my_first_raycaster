@@ -46,7 +46,7 @@ void generate_enemy_texture(SDL_Renderer* renderer, TextureInfo* texture);
 void destroy_enemies(void);
 
 // Add enemy spawn position to map
-void spawn_enemy_at(float x, float y);
+void spawn_enemy_at(float x, float y, EnemyType type);
 
 // Update enemy positions (called each frame)
 void update_enemies(const Player* player, int map[MAP_HEIGHT][MAP_WIDTH]);

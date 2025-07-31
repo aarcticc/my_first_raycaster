@@ -43,62 +43,99 @@ void generate_enemy_texture(SDL_Renderer* renderer __attribute__((unused)), Text
     // Get enemy type from the offset in the enemies array
     int enemy_index = ((uintptr_t)texture - (uintptr_t)&enemies[0].texture) / sizeof(Enemy);
     EnemyType type = enemies[enemy_index].type;
+    
+    // Current time for animation effects
+    float time = SDL_GetTicks() / 1000.0f;
 
-    // Generate texture based on enemy type
     for (int y = 0; y < ENEMY_HEIGHT; y++) {
         for (int x = 0; x < ENEMY_WIDTH; x++) {
-            Uint32 color = 0x00000000; // Transparent by default
-            
-            // Calculate normalized coordinates from center (-1 to 1)
+            // Calculate normalized coordinates (-1 to 1)
             float nx = (x - ENEMY_WIDTH/2.0f) / (ENEMY_WIDTH/2.0f);
             float ny = (y - ENEMY_HEIGHT/2.0f) / (ENEMY_HEIGHT/2.0f);
             float dist = sqrtf(nx*nx + ny*ny);
-            
+            float angle = atan2f(ny, nx);
+
+            // Start with fully transparent
+            Uint32 color = 0x00000000;
+
             switch (type) {
                 case ENEMY_GUARD:
-                    // Simple red circular guard
+                    // Red guard with pulsing core
                     if (dist < 0.8f) {
-                        if (dist < 0.3f) {
-                            color = 0xFFFF0000;  // Bright red core
+                        float pulse = sinf(time * 3.0f) * 0.2f + 0.8f;
+                        if (dist < 0.3f * pulse) {
+                            // Bright core
+                            color = 0xFFFF2020;
                         } else if (dist < 0.5f) {
-                            color = 0xFF800000;  // Dark red middle
+                            // Middle ring
+                            color = 0xFFCC0000;
                         } else {
+                            // Outer glow
                             float alpha = (0.8f - dist) / 0.3f;
                             Uint8 a = (Uint8)(alpha * 255);
-                            color = (a << 24) | 0x00400000;  // Fading edge
+                            color = (a << 24) | 0x00800000;
+                        }
+                        // Add pattern
+                        if (sinf(angle * 8 + time * 2) > 0.7f) {
+                            color = 0xFFFF4040;
                         }
                     }
                     break;
 
                 case ENEMY_PATROL:
-                    // Yellow pulsing patrol with pattern
-                    if (dist < 0.8f) {
-                        float angle = atan2f(ny, nx);
-                        float pattern = sinf(angle * 8) * 0.2f;
+                    // Yellow patrol with rotating elements
+                    if (dist < 0.9f) {
+                        float rotAngle = angle + time * 2;
+                        float pattern = sinf(rotAngle * 6) * 0.2f;
                         if (dist + pattern < 0.7f) {
                             if (dist < 0.3f) {
-                                color = 0xFFFFD700;  // Gold core
+                                // Core
+                                color = 0xFFFFD700;
                             } else {
-                                color = 0xFFFFAA00;  // Orange outer
+                                // Rotating segments
+                                float segment = sinf(rotAngle * 4);
+                                if (segment > 0) {
+                                    color = 0xFFDAA520;
+                                } else {
+                                    color = 0xFFFFA500;
+                                }
                             }
+                            // Add pulsing effect
+                            float pulse = sinf(time * 4 + dist * 5) * 0.3f + 0.7f;
+                            Uint8 r = ((color >> 16) & 0xFF) * pulse;
+                            Uint8 g = ((color >> 8) & 0xFF) * pulse;
+                            Uint8 b = (color & 0xFF) * pulse;
+                            color = (0xFF << 24) | (r << 16) | (g << 8) | b;
                         }
                     }
                     break;
 
                 case ENEMY_BOSS:
-                    // Purple boss with spiky pattern
-                    if (dist < 0.9f) {
-                        float angle = atan2f(ny, nx);
-                        float spikes = 0.2f * sinf(angle * 6);
-                        if (dist + spikes < 0.8f) {
+                    // Purple boss with energy field
+                    if (dist < 1.0f) {
+                        float energyField = sinf(dist * 10 - time * 3) * 0.5f + 0.5f;
+                        float spikes = 0.2f * sinf(angle * 8 + time);
+                        
+                        if (dist + spikes < 0.9f) {
                             if (dist < 0.4f) {
-                                color = 0xFF8B008B;  // Dark magenta core
-                            } else if (dist < 0.6f) {
-                                color = 0xFF4B0082;  // Indigo middle
+                                // Core
+                                color = 0xFF8B008B;
+                                // Add energy swirls
+                                float swirl = sinf(angle * 6 + time * 4);
+                                if (swirl > 0.7f) {
+                                    color = 0xFFFF00FF;
+                                }
+                            } else if (dist < 0.7f) {
+                                // Energy field
+                                color = 0xFF4B0082;
+                                if (energyField > 0.8f) {
+                                    color = 0xFF800080;
+                                }
                             } else {
-                                float alpha = (0.8f - dist) / 0.2f;
-                                Uint8 a = (Uint8)(alpha * 255);
-                                color = (a << 24) | 0x00800080;  // Purple edge
+                                // Outer aura
+                                float alpha = (1.0f - dist) * 255;
+                                Uint8 a = (Uint8)alpha;
+                                color = (a << 24) | 0x00400040;
                             }
                         }
                     }
@@ -122,16 +159,21 @@ void destroy_enemies(void) {
     log_error(log_file, "[Enemies] Enemy system destroyed");
 }
 
-void spawn_enemy_at(float x, float y) {
+// Example of spawning different enemy types
+void spawn_enemy_at(float x, float y, EnemyType type) {
     for (int i = 0; i < MAX_ENEMIES; i++) {
         if (!enemies[i].active) {
             enemies[i].x = x;
             enemies[i].y = y;
+            enemies[i].type = type;
             enemies[i].active = 1;
             enemies[i].dirX = 0;
             enemies[i].dirY = 0;
             enemies[i].lastMoveTime = SDL_GetTicks();
-            log_error(log_file, "[Enemy] Spawned new enemy");
+            enemies[i].angle = (float)(rand() % 360) * M_PI / 180.0f;
+            
+            // Generate initial texture
+            generate_enemy_texture(NULL, &enemies[i].texture);
             break;
         }
     }
@@ -188,50 +230,90 @@ int is_player_caught(const Player* player) {
 }
 
 void render_enemies(Graphics* gfx, const Player* player) {
-    for (int i = 0; i < MAX_ENEMIES; i++) {
-        if (!enemies[i].active) continue;
+    // Create z-buffer for sprite ordering
+    float zBuffer[SCREEN_WIDTH];
+    for (int x = 0; x < SCREEN_WIDTH; x++) {
+        zBuffer[x] = player->perpWallDist[x];
+    }
 
-        // Calculate enemy position relative to player
-        float spriteX = enemies[i].x - player->x;
-        float spriteY = enemies[i].y - player->y;
+    // Sort enemies by distance (simple bubble sort)
+    int spriteOrder[MAX_ENEMIES];
+    float spriteDistance[MAX_ENEMIES];
+    
+    for (int i = 0; i < MAX_ENEMIES; i++) {
+        spriteOrder[i] = i;
+        spriteDistance[i] = ((player->x - enemies[i].x) * (player->x - enemies[i].x) +
+                            (player->y - enemies[i].y) * (player->y - enemies[i].y));
+    }
+
+    // Bubble sort sprites based on distance
+    for (int i = 0; i < MAX_ENEMIES - 1; i++) {
+        for (int j = 0; j < MAX_ENEMIES - i - 1; j++) {
+            if (spriteDistance[j] < spriteDistance[j + 1]) {
+                // Swap distances
+                float tempDist = spriteDistance[j];
+                spriteDistance[j] = spriteDistance[j + 1];
+                spriteDistance[j + 1] = tempDist;
+                // Swap orders
+                int tempOrder = spriteOrder[j];
+                spriteOrder[j] = spriteOrder[j + 1];
+                spriteOrder[j + 1] = tempOrder;
+            }
+        }
+    }
+
+    // Render sprites from farthest to closest
+    for (int i = 0; i < MAX_ENEMIES; i++) {
+        Enemy* enemy = &enemies[spriteOrder[i]];
+        if (!enemy->active) continue;
+
+        // Translate sprite position relative to camera
+        float spriteX = enemy->x - player->x;
+        float spriteY = enemy->y - player->y;
 
         // Transform sprite with the inverse camera matrix
         float invDet = 1.0f / (player->planeX * player->dirY - player->dirX * player->planeY);
         float transformX = invDet * (player->dirY * spriteX - player->dirX * spriteY);
         float transformY = invDet * (-player->planeY * spriteX + player->planeX * spriteY);
 
-        if (transformY <= 0) continue;
+        // Don't render if behind camera
+        if (transformY <= 0.1f) continue;
 
-        // Calculate sprite screen position
+        // Calculate screen position and scaling
         int spriteScreenX = (int)((SCREEN_WIDTH / 2) * (1 + transformX / transformY));
         int spriteHeight = abs((int)(SCREEN_HEIGHT / transformY));
-        
+        int spriteWidth = abs((int)(SCREEN_HEIGHT / transformY));
+
         // Calculate drawing bounds
         int drawStartY = -spriteHeight / 2 + SCREEN_HEIGHT / 2;
-        if (drawStartY < 0) drawStartY = 0;
         int drawEndY = spriteHeight / 2 + SCREEN_HEIGHT / 2;
-        if (drawEndY >= SCREEN_HEIGHT) drawEndY = SCREEN_HEIGHT - 1;
-
-        int spriteWidth = abs((int)(SCREEN_HEIGHT / transformY));
         int drawStartX = -spriteWidth / 2 + spriteScreenX;
-        if (drawStartX < 0) drawStartX = 0;
         int drawEndX = spriteWidth / 2 + spriteScreenX;
+
+        // Clamp drawing bounds
+        if (drawStartY < 0) drawStartY = 0;
+        if (drawEndY >= SCREEN_HEIGHT) drawEndY = SCREEN_HEIGHT - 1;
+        if (drawStartX < 0) drawStartX = 0;
         if (drawEndX >= SCREEN_WIDTH) drawEndX = SCREEN_WIDTH - 1;
 
-        // Render sprite
+        // Draw the sprite
         for (int stripe = drawStartX; stripe < drawEndX; stripe++) {
-            int texX = (int)(256 * (stripe - (-spriteWidth / 2 + spriteScreenX)) * ENEMY_WIDTH / spriteWidth) / 256;
-            if (transformY > 0 && stripe > 0 && stripe < SCREEN_WIDTH && transformY < 1000.0) {
-                for (int y = drawStartY; y < drawEndY; y++) {
-                    int d = (y) * 256 - SCREEN_HEIGHT * 128 + spriteHeight * 128;
-                    int texY = ((d * ENEMY_HEIGHT) / spriteHeight) / 256;
-                    
-                    if (texX >= 0 && texX < ENEMY_WIDTH && texY >= 0 && texY < ENEMY_HEIGHT) {
-                        Uint32 color = enemies[i].texture.pixels[ENEMY_WIDTH * texY + texX];
-                        if ((color & 0xFF000000) != 0 && 
-                            y >= 0 && y < SCREEN_HEIGHT && 
-                            stripe >= 0 && stripe < SCREEN_WIDTH) { 
-                            gfx->pixels[y * SCREEN_WIDTH + stripe] = color;
+            // Check if stripe is visible and in front of walls
+            if (transformY > zBuffer[stripe]) {
+                int texX = (int)(256 * (stripe - (-spriteWidth / 2 + spriteScreenX)) * ENEMY_WIDTH / spriteWidth) / 256;
+
+                // Draw the vertical stripe
+                if (texX >= 0 && texX < ENEMY_WIDTH) {
+                    for (int y = drawStartY; y < drawEndY; y++) {
+                        int d = (y) * 256 - SCREEN_HEIGHT * 128 + spriteHeight * 128;
+                        int texY = ((d * ENEMY_HEIGHT) / spriteHeight) / 256;
+
+                        if (texY >= 0 && texY < ENEMY_HEIGHT) {
+                            Uint32 color = enemy->texture.pixels[ENEMY_WIDTH * texY + texX];
+                            // Only draw pixel if not transparent
+                            if ((color & 0xFF000000) != 0) {
+                                gfx->pixels[y * SCREEN_WIDTH + stripe] = color;
+                            }
                         }
                     }
                 }

@@ -117,6 +117,9 @@ void render_frame(Graphics *gfx, Player *player, int map[MAP_HEIGHT][MAP_WIDTH])
         float perpWallDist = (side == 0) ?
             (mapX - player->x + (1 - stepX) / 2.0f) / rayDirX :
             (mapY - player->y + (1 - stepY) / 2.0f) / rayDirY;
+            
+        // Store the perpendicular wall distance for sprite rendering
+        player->perpWallDist[x] = perpWallDist;
 
         // Calculate height of line to draw on screen
         int lineHeight = (int)(SCREEN_HEIGHT / perpWallDist);

@@ -96,7 +96,15 @@ int main(void) {
     log_error(log_file, "[System] All systems initialized successfully");
 
     // Initialize player position and direction with safety check
-    Player player = {1.5f, 1.5f, -1.0f, 0.0f, 0.0f, 0.66f};
+    Player player = {
+        .x = 1.5f,
+        .y = 1.5f,
+        .dirX = -1.0f,
+        .dirY = 0.0f,
+        .planeX = 0.0f,
+        .planeY = 0.66f,
+        .perpWallDist = {0}  // Initialize all elements to 0
+    };
     
     // Check if spawn position is valid, if not find nearest safe spot
     if (!is_valid_position(player.x, player.y)) {
@@ -146,8 +154,8 @@ int main(void) {
     }
 
     // Spawn some enemies at predetermined positions
-    spawn_enemy_at(2.5f, 2.5f);
-    spawn_enemy_at(18.5f, 18.5f);
+    spawn_enemy_at(2.5f, 2.5f, ENEMY_GUARD);
+    spawn_enemy_at(18.5f, 18.5f, ENEMY_PATROL);
 
     // Setup event handling and keyboard state
     SDL_Event event;

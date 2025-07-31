@@ -400,19 +400,19 @@
                         </div>
                         <div class="legend-item">
                             <div class="legend-color" style="background: linear-gradient(45deg, #8b4513, #a0522d);"></div>
-                            <span>Wood (1)</span>
+                            <span>Wall 1</span>
                         </div>
                         <div class="legend-item">
                             <div class="legend-color" style="background: linear-gradient(45deg, #696969, #808080);"></div>
-                            <span>Stone (2)</span>
+                            <span>Wall 2</span>
                         </div>
                         <div class="legend-item">
                             <div class="legend-color" style="background: linear-gradient(45deg, #2e8b57, #3cb371);"></div>
-                            <span>Moss (3)</span>
+                            <span>Wall 3</span>
                         </div>
                         <div class="legend-item">
                             <div class="legend-color" style="background: linear-gradient(45deg, #4682b4, #5f9ea0);"></div>
-                            <span>Metal (4)</span>
+                            <span>Wall 4</span>
                         </div>
                     </div>
 
@@ -749,10 +749,10 @@
 
             document.getElementById('stats').innerHTML = `
                 <div>Empty Cells: ${stats.empty}</div>
-                <div>Wooden Walls: ${stats.wall1}</div>
-                <div>Stone Walls: ${stats.wall2}</div>
-                <div>Moss Walls: ${stats.wall3}</div>
-                <div>Metal Walls: ${stats.wall4}</div>
+                <div>Wall 1: ${stats.wall1}</div>
+                <div>Wall 2: ${stats.wall2}</div>
+                <div>Wall 3: ${stats.wall3}</div>
+                <div>Wall 4: ${stats.wall4}</div>
                 <div>Guards: ${stats.guards}</div>
                 <div>Patrols: ${stats.patrols}</div>
                 <div>Bosses: ${stats.bosses}</div>
@@ -791,10 +791,10 @@
             if (includeTextures) {
                 code += `// Textur-Definitionen\n`;
                 code += `#define TEXTURE_EMPTY  0\n`;
-                code += `#define TEXTURE_WOOD   1  // texture1.bmp\n`;
-                code += `#define TEXTURE_STONE  2  // texture2.bmp\n`;
-                code += `#define TEXTURE_MOSS   3  // texture3.bmp\n`;
-                code += `#define TEXTURE_METAL  4  // texture4.bmp\n\n`;
+                code += `#define TEXTURE_WALL_1  1  // wall1.jpg\n`;
+                code += `#define TEXTURE_WALL_2  2  // wall2.jpg\n`;
+                code += `#define TEXTURE_WALL_3  3  // wall3.jpg\n`;
+                code += `#define TEXTURE_WALL_4  4  // wall4.jpg\n\n`;
             }
             
             if (includeEnemies && enemies.length > 0) {
