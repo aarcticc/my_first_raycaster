@@ -1,6 +1,6 @@
 CC = gcc
 CFLAGS = -Wall -Wextra -Werror -std=c99 -O2 -Iinclude -fopenmp -g -D_USE_MATH_DEFINES
-LDFLAGS = -lSDL2 -lSDL2_image -lm -fopenmp -ljson-c
+LDFLAGS = -lSDL2 -lSDL2_image -lm -fopenmp
 
 # Source files and object files
 SRC_DIR = src
@@ -48,7 +48,6 @@ run: $(BIN)
 check-deps:
 	@echo "Checking dependencies..."
 	@which sdl2-config > /dev/null || (echo "Error: SDL2 development files not found"; exit 1)
-	@ldconfig -p | grep libjson-c > /dev/null || (echo "Error: json-c library not found"; exit 1)
 	@pkg-config --exists SDL2_image || (echo "Error: SDL2_image not found"; exit 1)
 	@echo "All dependencies OK"
 

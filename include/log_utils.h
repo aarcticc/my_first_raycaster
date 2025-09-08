@@ -10,7 +10,6 @@
 #define LOG_MODULE_GRAPHICS  "[Graphics]"
 #define LOG_MODULE_TEXTURE   "[Texture]"
 #define LOG_MODULE_MAP       "[Map]"
-#define LOG_MODULE_ENEMY     "[Enemy]"
 #define LOG_MODULE_PLAYER    "[Player]"
 #define LOG_MODULE_INPUT     "[Input]"
 #define LOG_MODULE_CONFIG    "[Config]"

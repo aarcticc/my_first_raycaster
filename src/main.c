@@ -73,17 +73,6 @@ int main(void) {
     }
     log_error(log_file, "[Textures] Successfully loaded all textures");
 
-    // Initialize enemies after textures are loaded
-    if (init_enemies(gfx.renderer) != 0) {
-        log_error(log_file, "[Enemies] Failed to initialize");
-        destroy_enemies();
-        destroy_textures();
-        shutdown_graphics(&gfx);
-        SDL_Quit();
-        return 1;
-    }
-    log_error(log_file, "[Enemies] Successfully initialized");
-
     // Log successful startup
     log_error(log_file, "[System] All systems initialized successfully");
 
@@ -145,10 +134,6 @@ int main(void) {
         return 1;
     }
 
-    // Spawn some enemies at predetermined positions
-    // spawn_enemy_at(2.5f, 2.5f, ENEMY_GUARD);
-    // spawn_enemy_at(18.5f, 18.5f, ENEMY_PATROL);
-
     // Setup event handling and keyboard state
     SDL_Event event;
     const Uint8 *keystate = SDL_GetKeyboardState(NULL);
@@ -165,21 +150,11 @@ int main(void) {
                 running = 0;
             }
         }
-
-        // Update enemy positions
-        update_enemies(&player, map);
         
         // Process player input and update position
         handle_input(&player, keystate, map);
         // Render the current frame
         render_frame(&gfx, &player, map);
-        // Render enemies
-        render_enemies(&gfx, &player);
-        
-        // Check if player is caught and render indicator
-        if (is_player_caught(&player)) {
-            render_caught_indicator(&gfx);
-        }
         
         // Add a small delay to control frame rate (approx. 60 FPS)
         SDL_Delay(16);
@@ -188,7 +163,6 @@ int main(void) {
     // Cleanup everything in reverse order of initialization
     log_error(log_file, "[System] Starting cleanup");
     log_separator(log_file, "SHUTDOWN SEQUENCE");
-    destroy_enemies();
     destroy_textures();
     log_error(log_file, "[Textures] Destroyed");
     shutdown_graphics(&gfx);

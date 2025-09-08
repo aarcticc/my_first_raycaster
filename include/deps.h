@@ -2,6 +2,7 @@
     This file defines and includes all necessary dependencies.
  !  NOTE: This is only for non release/early develpment! 
     The "!" in comments are for the "Better Comments" extension, "aaron-bond.better-comments".
+    TODO: add JSON headers, add als SDL2 headers to files(otherwise it doesn't work)
 */
 //############################################################
 /*
@@ -42,10 +43,4 @@
 #ifdef _OPENMP
 #include <omp.h> 
 #endif
-//###########################################################
-/*
-  * Unused, Placeholder Headers
-  
-  ? #include "enemy.h" 
-*/
 //######################END#OF#FILE##########################
