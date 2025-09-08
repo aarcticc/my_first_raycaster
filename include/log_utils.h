@@ -2,7 +2,7 @@
 #define LOG_UTILS_H
 
 // Include for size_t type definition used in string operations
-#include <stddef.h>
+#include "deps.h"
 
 // Module identifiers for logging
 #define LOG_MODULE_SYSTEM    "[System]"
@@ -12,11 +12,11 @@
 #define LOG_MODULE_MAP       "[Map]"
 #define LOG_MODULE_ENEMY     "[Enemy]"
 #define LOG_MODULE_PLAYER    "[Player]"
-#define LOG_MODULE_INPUT    "[Input]"
-#define LOG_MODULE_CONFIG   "[Config]"
-#define LOG_MODULE_RENDER   "[Render]"
-#define LOG_MODULE_ASSET    "[Asset]"
-#define LOG_MODULE_RESOURCE "[Resource]"
+#define LOG_MODULE_INPUT     "[Input]"
+#define LOG_MODULE_CONFIG    "[Config]"
+#define LOG_MODULE_RENDER    "[Render]"
+#define LOG_MODULE_ASSET     "[Asset]"
+#define LOG_MODULE_RESOURCE  "[Resource]"
 
 // Log sections for better organization
 #define LOG_SECTION_INIT     "INITIALIZATION"

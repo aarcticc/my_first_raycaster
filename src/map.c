@@ -1,11 +1,13 @@
-#include "map.h"
-#include "log_utils.h"
-#include "enemy.h"
-#include <math.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <json-c/json.h>
+#include "deps.h"
+
+static struct json_value_s *find_in_object(struct json_object_s *obj, const char *key) {
+    for (struct json_object_element_s *el = obj->start; el; el = el->next) {
+        if (el->name && el->name->string && strcmp(el->name->string, key) == 0) {
+            return el->value;
+        }
+    }
+    return NULL;
+}
 
 /* Map representation:
    0 = Empty space (corridor)
@@ -78,84 +80,115 @@ void find_nearest_empty_space(float* x, float* y) {
 }
 
 int load_custom_map(const char* filename) {
-    json_object *root;
-    json_object *grid, *enemies_array;
-    
-    root = json_object_from_file(filename);
+    FILE *f = fopen(filename, "rb");
+    if (!f) {
+        log_error(log_file, "[Map] Failed to open JSON file");
+        return 1;
+    }
+
+    if (fseek(f, 0, SEEK_END) != 0) {
+        fclose(f);
+        log_error(log_file, "[Map] Failed to read JSON file");
+        return 1;
+    }
+
+    long fsize = ftell(f);
+    if (fsize < 0) {
+        fclose(f);
+        log_error(log_file, "[Map] Failed to read JSON file size");
+        return 1;
+    }
+    rewind(f);
+
+    char *buffer = (char*)malloc((size_t)fsize);
+    if (!buffer) {
+        fclose(f);
+        log_error(log_file, "[Map] Out of memory reading JSON");
+        return 1;
+    }
+
+    if (fread(buffer, 1, (size_t)fsize, f) != (size_t)fsize) {
+        free(buffer);
+        fclose(f);
+        log_error(log_file, "[Map] Failed to read JSON file contents");
+        return 1;
+    }
+
+    fclose(f);
+
+    struct json_parse_result_s res;
+    struct json_value_s *root = json_parse_ex(buffer, (size_t)fsize, json_parse_flags_default, NULL, NULL, &res);
     if (!root) {
+        free(buffer);
         log_error(log_file, "[Map] Failed to parse JSON file");
         return 1;
     }
 
-    // Get and validate dimensions
-    json_object *width_obj, *height_obj;
-    if (json_object_object_get_ex(root, "width", &width_obj) &&
-        json_object_object_get_ex(root, "height", &height_obj)) {
-        int width = json_object_get_int(width_obj);
-        int height = json_object_get_int(height_obj);
-        if (width != MAP_WIDTH || height != MAP_HEIGHT) {
-            log_error(log_file, "[Map] Map dimensions mismatch");
-            json_object_put(root);
-            return 1;
-        }
-    }
-
-    // Get the grid array
-    if (!json_object_object_get_ex(root, "grid", &grid)) {
-        log_error(log_file, "[Map] No grid found in JSON");
-        json_object_put(root);
+    /* root must be an object */
+    struct json_object_s *root_obj = json_value_as_object(root);
+    if (!root_obj) {
+        free(root);
+        free(buffer);
+        log_error(log_file, "[Map] JSON root is not an object");
         return 1;
     }
 
-    // Load the map grid
-    for (int y = 0; y < MAP_HEIGHT; y++) {
-        json_object *row = json_object_array_get_idx(grid, y);
-        if (!row) continue;
-        
-        for (int x = 0; x < MAP_WIDTH; x++) {
-            json_object *cell = json_object_array_get_idx(row, x);
-            if (!cell) continue;
-            map[y][x] = json_object_get_int(cell);
-        }
-    }
-
-    // Reset existing enemies
-    for (int i = 0; i < MAX_ENEMIES; i++) {
-        enemies[i].active = 0;
-    }
-
-    // Load enemies if present
-    if (json_object_object_get_ex(root, "enemies", &enemies_array)) {
-        int enemy_count = json_object_array_length(enemies_array);
-        enemy_count = enemy_count < MAX_ENEMIES ? enemy_count : MAX_ENEMIES;
-
-        for (int i = 0; i < enemy_count; i++) {
-            json_object *enemy = json_object_array_get_idx(enemies_array, i);
-            json_object *x, *y, *type, *health;
-
-            if (json_object_object_get_ex(enemy, "x", &x) &&
-                json_object_object_get_ex(enemy, "y", &y) &&
-                json_object_object_get_ex(enemy, "type", &type) &&
-                json_object_object_get_ex(enemy, "health", &health)) {
-
-                // Get enemy type string and convert to enum
-                const char* type_str = json_object_get_string(type);
-                EnemyType enemy_type = ENEMY_GUARD; // default
-                if (strcmp(type_str, "patrol") == 0) enemy_type = ENEMY_PATROL;
-                if (strcmp(type_str, "boss") == 0) enemy_type = ENEMY_BOSS;
-
-                // Set enemy properties
-                enemies[i].x = json_object_get_double(x);
-                enemies[i].y = json_object_get_double(y);
-                enemies[i].type = enemy_type;
-                enemies[i].health = json_object_get_int(health);
-                enemies[i].active = 1;
-                enemies[i].angle = (float)(rand() % 360) * M_PI / 180.0f;
+    /* Validate dimensions if present */
+    struct json_value_s *width_val = find_in_object(root_obj, "width");
+    struct json_value_s *height_val = find_in_object(root_obj, "height");
+    if (width_val && height_val) {
+        struct json_number_s *wnum = json_value_as_number(width_val);
+        struct json_number_s *hnum = json_value_as_number(height_val);
+        if (wnum && hnum) {
+            int width = atoi(wnum->number);
+            int height = atoi(hnum->number);
+            if (width != MAP_WIDTH || height != MAP_HEIGHT) {
+                free(root);
+                free(buffer);
+                log_error(log_file, "[Map] Map dimensions mismatch");
+                return 1;
             }
         }
-        log_error(log_file, "[Map] Enemies loaded from JSON");
     }
 
-    json_object_put(root);
+    /* Load the grid */
+    struct json_value_s *grid_val = find_in_object(root_obj, "grid");
+    if (!grid_val) {
+        free(root);
+        free(buffer);
+        log_error(log_file, "[Map] No grid found in JSON");
+        return 1;
+    }
+
+    struct json_array_s *grid_arr = json_value_as_array(grid_val);
+    if (!grid_arr) {
+        free(root);
+        free(buffer);
+        log_error(log_file, "[Map] grid is not an array");
+        return 1;
+    }
+
+    struct json_array_element_s *row_el = grid_arr->start;
+    for (int y = 0; y < MAP_HEIGHT; y++) {
+        if (!row_el) break;
+        struct json_value_s *row_val = row_el->value;
+        struct json_array_s *row_arr = json_value_as_array(row_val);
+        if (row_arr) {
+            struct json_array_element_s *cell_el = row_arr->start;
+            for (int x = 0; x < MAP_WIDTH; x++) {
+                if (!cell_el) break;
+                struct json_value_s *cell_val = cell_el->value;
+                struct json_number_s *num = json_value_as_number(cell_val);
+                if (num && num->number) {
+                    map[y][x] = atoi(num->number);
+                }
+                cell_el = cell_el->next;
+            }
+        }
+        row_el = row_el->next;
+    }
+
+    free(root);
+    free(buffer);
     return 0;
 }

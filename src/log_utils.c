@@ -1,7 +1,4 @@
-#include "log_utils.h"
-#include <stdio.h>
-#include <time.h>
-#include <string.h>
+#include "deps.h"
 
 // Global definition of log_file
 char log_file[64];

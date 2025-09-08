@@ -1,11 +1,7 @@
 #ifndef TEXTURE_H
 #define TEXTURE_H
 
-// Prevents multiple inclusions of this header file
-#pragma once
-
-// Include SDL2 graphics library header
-#include <SDL2/SDL.h>
+#include "deps.h"
 
 // Update texture definitions for clarity
 #define NUM_WALL_TEXTURES 4

@@ -1,12 +1,4 @@
-#include "raycaster.h"
-#include "texture.h"
-#include "log_utils.h"
-#include "enemy.h"
-#ifdef _OPENMP
-#include <omp.h>
-#endif
-#include <sys/stat.h>
-#include <unistd.h>
+#include "deps.h"
 
 int main(void) {
     // Initialize log file name
@@ -154,8 +146,8 @@ int main(void) {
     }
 
     // Spawn some enemies at predetermined positions
-    spawn_enemy_at(2.5f, 2.5f, ENEMY_GUARD);
-    spawn_enemy_at(18.5f, 18.5f, ENEMY_PATROL);
+    // spawn_enemy_at(2.5f, 2.5f, ENEMY_GUARD);
+    // spawn_enemy_at(18.5f, 18.5f, ENEMY_PATROL);
 
     // Setup event handling and keyboard state
     SDL_Event event;

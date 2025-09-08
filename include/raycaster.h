@@ -1,10 +1,7 @@
 #ifndef RAYCASTER_H
 #define RAYCASTER_H
 
-// Include necessary headers for map data, texture definitions, and SDL graphics library
-#include "map.h"
-#include "texture.h"
-#include <SDL2/SDL.h>
+#include "deps.h"
 
 /*
     size = SCREEN_WIDTH x SCREEN_HEIGHT

@@ -1,7 +1,4 @@
-#include "texture.h"
-#include "log_utils.h"
-#include <SDL2/SDL_image.h>
-#include <string.h>
+#include "deps.h"
 
 TextureInfo wall_textures[NUM_WALL_TEXTURES] = {0};
 TextureInfo floor_texture = {0};
