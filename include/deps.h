@@ -1,12 +1,12 @@
 /* 
     This file defines and includes all necessary dependencies.
  !  NOTE: This is only for non release/early develpment! 
-    The "!" in comments are for the "Better Comments" extension, "aaron-bond.better-comments".
+    The "!" and "?" in comments are for the "Better Comments" extension, "aaron-bond.better-comments".
     TODO: add JSON headers, add als SDL2 headers to files(otherwise it doesn't work)
 */
-//############################################################
+//?############################################################
 /*
-  *  Linux Headers, used by:
+  *  Standart C Library, used by:
 */
 #include <sys/stat.h>       // main.c
 #include <unistd.h>         // main.c
@@ -17,14 +17,14 @@
 #include <time.h>           // log_utils.c
 #include <stddef.h>         // log_utils.h
 
-//###########################################################
+//?###########################################################
 /*
   *  SDL2 Headers, used by:
 */
 #include <SDL2/SDL.h>       // texture.c, raycaster.h, texture.h
 #include <SDL2/SDL_image.h> // texture.c
 
-//###########################################################
+//?###########################################################
 /*                            
   *  Project Headers, used by:
 */                            
@@ -34,7 +34,7 @@
 #include "map.h"            // raycaster.c, map.c, raycaster.h
 #include "json.h"           // map.c
 
-//###########################################################
+//?###########################################################
 /*
   *  OPENMP Header, used by:
   !  main.c
@@ -43,4 +43,4 @@
 #ifdef _OPENMP
 #include <omp.h> 
 #endif
-//######################END#OF#FILE##########################
+//?######################END#OF#FILE##########################
