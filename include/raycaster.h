@@ -1,8 +1,11 @@
 #ifndef RAYCASTER_H
 #define RAYCASTER_H
 
-#include "deps.h"
 #include <SDL2/SDL.h>
+//! SDL2 Headers
+#include "texture.h"
+#include "map.h"
+//! Project Headers
 
 /*
     size = SCREEN_WIDTH x SCREEN_HEIGHT

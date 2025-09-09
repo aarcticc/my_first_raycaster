@@ -1,4 +1,16 @@
-#include "deps.h"
+#include <unistd.h>
+#include <errno.h>
+//! Standart C Library
+#include "raycaster.h"
+#include "texture.h"
+#include "log_utils.h"
+#include "start_wrapper.h"
+#include "map.h"
+//! Project Headers
+#ifdef _OPENMP
+#include <omp.h>
+#endif
+//! OPENMP Header
 
 int main(void) {
     // Initialize log file name
@@ -6,10 +18,16 @@ int main(void) {
     log_separator(log_file, "GAME INITIALIZATION");
     
     // Check if maps directory exists
-    struct stat st = {0};
-    if (stat("maps", &st) == -1) {
-        mkdir("maps", 0700);
-        log_error(log_file, "[System] Created maps directory");
+    void ensure_maps_dir(FILE *log_file) {
+        stat_t st;
+        if (stat("maps", &st) == -1) {
+            if (mkdir("maps", 0700) == -1) {
+                // log mkdir failure
+                fprintf(log_file, "[System] Failed to create maps directory: %s\n", strerror(errno));
+            } else {
+                fprintf(log_file, "[System] Created maps directory\n");
+            }
+        }
     }
 
     // Try to load map files in order of preference

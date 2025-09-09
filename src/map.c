@@ -1,4 +1,12 @@
-#include "deps.h"
+#include <math.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h> 
+//! Standart C Library
+#include "log_utils.h"
+#include "map.h"
+#include "json.h"
+//! Project Headers
 
 static struct json_value_s *find_in_object(struct json_object_s *obj, const char *key) {
     for (struct json_object_element_s *el = obj->start; el; el = el->next) {

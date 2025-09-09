@@ -1,4 +1,9 @@
-#include "deps.h"
+#include <stdio.h>
+#include <string.h>
+#include <time.h>
+//! Standart C Library
+#include "log_utils.h"
+//! Project Headers
 
 // Global definition of log_file
 char log_file[64];

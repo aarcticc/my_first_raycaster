@@ -1,6 +1,13 @@
-#include <SDL2/SDL_image.h>
+#include <stdio.h>
+#include <stdlib.h> 
+#include <string.h>
+//! Standart C Library
+#include "texture.h"
+#include "log_utils.h"
+//! Project Headers
 #include <SDL2/SDL.h>
-#include "deps.h"
+#include <SDL2/SDL_image.h>
+//! SDL2 Headers
 
 TextureInfo wall_textures[NUM_WALL_TEXTURES] = {0};
 TextureInfo floor_texture = {0};

@@ -2,7 +2,8 @@
 #define LOG_UTILS_H
 
 // Include for size_t type definition used in string operations
-#include "deps.h"
+#include <stddef.h>
+//! Standart C Library
 
 // Module identifiers for logging
 #define LOG_MODULE_SYSTEM    "[System]"

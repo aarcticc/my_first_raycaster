@@ -1,4 +1,9 @@
-#include "deps.h"
+#include "raycaster.h"
+#include "texture.h"
+#include "map.h"
+//! Project Headers
+#include <omp.h>
+//! OPENMP Header
 
 // Initialize graphics system - creates window, renderer, and texture buffer
 int init_graphics(Graphics *gfx) {
