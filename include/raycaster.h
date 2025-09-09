@@ -2,6 +2,7 @@
 #define RAYCASTER_H
 
 #include "deps.h"
+#include <SDL2/SDL.h>
 
 /*
     size = SCREEN_WIDTH x SCREEN_HEIGHT

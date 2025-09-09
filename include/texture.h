@@ -2,6 +2,7 @@
 #define TEXTURE_H
 
 #include "deps.h"
+#include <SDL2/SDL.h>
 
 // Update texture definitions for clarity
 #define NUM_WALL_TEXTURES 4
