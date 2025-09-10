@@ -6,7 +6,7 @@
 //! Project Headers
 
 // Global definition of log_file
-char* log_file[LOG_FILE_LENGTH];
+char* log_file[64];
 
 // Function to generate a log filename based on current date/time
 // Format: error_DD-MM-YYYY_HH-MM.txt

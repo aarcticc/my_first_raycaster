@@ -24,13 +24,10 @@
 #define LOG_SECTION_SHUTDOWN "SHUTDOWN SEQUENCE"
 #define LOG_SECTION_ERROR    "ERROR"
 
-// Length of log File
-#define LOG_FILE_LENGTH 128
-
 // Global array to store the log file name
 // Size of 64 characters allows for reasonable file path length
 // 'extern' keyword makes this variable accessible from other source files
-extern char log_file[LOG_FILE_LENGTH];
+extern char log_file[64];
 
 // Function to generate a log filename based on current date/time
 // Parameters:
