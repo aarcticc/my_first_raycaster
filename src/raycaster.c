@@ -1,3 +1,7 @@
+/*
+ TODO: Create Renderer/check renderer
+*/
+
 #include "raycaster.h"
 #include "texture.h"
 #include "map.h"
@@ -9,7 +13,7 @@
 int init_graphics(Graphics *gfx) {
     // Create a window centered on screen with specified dimensions
     gfx->window = SDL_CreateWindow("Raycaster", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 
-                                 SCREEN_WIDTH, SCREEN_HEIGHT, 0);
+                                 SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN); // replaced '0' with 'SDL_WINDOW_SHOWN'
     if (!gfx->window) return -1;
 
     // Create hardware-accelerated renderer
