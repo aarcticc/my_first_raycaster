@@ -18,17 +18,10 @@ int main(void) {
     log_separator(log_file, "GAME INITIALIZATION");
     
     // Check if maps directory exists
-    // Change to old function
-    void ensure_maps_dir(FILE *log_file) {
-        stat_t st;
-        if (stat("maps", &st) == -1) {
-            if (mkdir("maps", 0700) == -1) {
-                // log mkdir failure
-                fprintf(log_file, "[System] Failed to create maps directory: %s\n", strerror(errno));
-            } else {
-                fprintf(log_file, "[System] Created maps directory\n");
-            }
-        }
+    struct stat st = {0};
+    if (stat("maps", &st) == -1) {
+        mkdir("maps", 0700);
+        log_error(log_file, "[System] Created maps directory");
     }
 
     // Try to load map files in order of preference
