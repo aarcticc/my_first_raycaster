@@ -18,6 +18,7 @@ int main(void) {
     log_separator(log_file, "GAME INITIALIZATION");
     
     // Check if maps directory exists
+    // Change to old function
     void ensure_maps_dir(FILE *log_file) {
         stat_t st;
         if (stat("maps", &st) == -1) {
