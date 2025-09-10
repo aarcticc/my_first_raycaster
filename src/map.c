@@ -22,6 +22,7 @@ static struct json_value_s *find_in_object(struct json_object_s *obj, const char
    1-0 = Different wall textures
 */
 
+// maybe change, to map is only in map.json files 
 int map[MAP_HEIGHT][MAP_WIDTH] = {
     {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1},
     {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
