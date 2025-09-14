@@ -1,16 +1,16 @@
+//! Standart C Library
 #include <unistd.h>
 #include <errno.h>
-//! Standart C Library
+//! Project Headers
 #include "raycaster.h"
 #include "texture.h"
 #include "log_utils.h"
 #include "start_wrapper.h"
 #include "map.h"
-//! Project Headers
+//! OPENMP Header
 #ifdef _OPENMP
 #include <omp.h>
 #endif
-//! OPENMP Header
 
 int main(void) {
     // Initialize log file name

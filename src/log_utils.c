@@ -1,9 +1,9 @@
+//! Standart C Library
 #include <stdio.h>
 #include <string.h>
 #include <time.h>
-//! Standart C Library
-#include "log_utils.h"
 //! Project Headers
+#include "log_utils.h"
 
 // Global definition of log_file
 char log_file[64];

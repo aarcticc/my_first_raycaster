@@ -1,13 +1,12 @@
 /*
  TODO: Create Renderer/check renderer
 */
-
+//! Project Headers
 #include "raycaster.h"
 #include "texture.h"
 #include "map.h"
-//! Project Headers
-#include <omp.h>
 //! OPENMP Header
+#include <omp.h>
 
 // Initialize graphics system - creates window, renderer, and texture buffer
 int init_graphics(Graphics *gfx) {
@@ -218,4 +217,3 @@ void handle_input(Player *player, const Uint8 *keystate, int map[MAP_HEIGHT][MAP
         player->planeY = oldPlaneX * sin(-ROT_SPEED) + player->planeY * cos(-ROT_SPEED);
     }
 }
-
