@@ -2,9 +2,11 @@
 #include <stdio.h>
 #include <stdlib.h> 
 #include <string.h>
+
 //! Project Headers
 #include "texture.h"
 #include "log_utils.h"
+
 //! SDL2 Headers
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
@@ -182,4 +184,3 @@ void update_texture_pixels(TextureInfo* tex) {
     SDL_UpdateTexture(tex->texture, NULL, tex->pixels,
                      tex->width * sizeof(Uint32));
 }
-

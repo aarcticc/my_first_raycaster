@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <time.h>
+
 //! Project Headers
 #include "log_utils.h"
 

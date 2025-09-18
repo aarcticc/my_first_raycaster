@@ -1,0 +1,37 @@
+
+===========================================
+    INITIALIZATION - STARTUP
+===========================================
+
+[13:29:16] [SDL] SDL initialized successfully
+[13:29:16]  [Graphics] Initialization successful
+[13:29:16] [Graphics] Graphics successfully initialized
+[13:29:16]  [Texture] Successfully loaded assets/wall1.png
+[13:29:16]  [Texture] Successfully loaded assets/wall2.png
+[13:29:16]  [Texture] Successfully loaded assets/wall3.png
+[13:29:16]  [Texture] Successfully loaded assets/wall4.png
+[13:29:16]  [Textures] Successfully loaded all textures
+[13:29:16]  [System] All systems initialized successfully
+[13:29:16]  [System] Starting texture validation
+[13:29:16]  [System] All textures validated successfully
+[13:29:16]  [Game] Starting main loop
+
+===========================================
+    log_18-09-2025_13-29.txt - STARTING MAIN LOOP
+===========================================
+
+[13:29:21]  [Game] Received quit signal
+[13:29:21]  [System] Starting cleanup
+
+===========================================
+    log_18-09-2025_13-29.txt - SHUTDOWN SEQUENCE
+===========================================
+
+[13:29:21]  [Textures] Destroyed
+[13:29:21]  [Graphics] Shutdown complete
+[13:29:21]  [System] Clean exit
+
+===========================================
+    log_18-09-2025_13-29.txt - CLEAN EXIT
+===========================================
+

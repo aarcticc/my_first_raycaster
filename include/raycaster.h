@@ -1,11 +1,12 @@
 #ifndef RAYCASTER_H
 #define RAYCASTER_H
 
-#include <SDL2/SDL.h>
 //! SDL2 Headers
+#include <SDL2/SDL.h>
+
+//! Project Headers
 #include "texture.h"
 #include "map.h"
-//! Project Headers
 
 /*
     size = SCREEN_WIDTH x SCREEN_HEIGHT
@@ -40,23 +41,18 @@
 */
 
 // Game configuration constants
-// SCREEN_WIDTH and SCREEN_HEIGHT define the game window resolution
 #define SCREEN_WIDTH 1280
 #define SCREEN_HEIGHT 720
-// MOVE_SPEED controls how fast the player moves
 #define MOVE_SPEED 0.06f
-// ROT_SPEED controls how fast the player rotates
 #define ROT_SPEED 0.06f
 
-// Player structure containing position and view direction data
 typedef struct {
-    float x, y;          // Player's position in 2D space
-    float dirX, dirY;    // Direction vector - where player is looking
-    float planeX, planeY; // Camera plane - used for raycasting field of view
-    float perpWallDist[SCREEN_WIDTH]; // Add z-buffer for sprite rendering
+    float x, y;
+    float dirX, dirY;
+    float planeX, planeY;
+    float perpWallDist[SCREEN_WIDTH];
 } Player;
 
-// Graphics structure containing SDL rendering components
 typedef struct {
     SDL_Window *window;
     SDL_Renderer *renderer;
@@ -64,7 +60,12 @@ typedef struct {
     Uint32 *pixels;
 } Graphics;
 
-// Function to initialize SDL and create window/renderer
+int init_graphics(Graphics *gfx);
+void shutdown_graphics(Graphics *gfx);
+void render_frame(Graphics *gfx, Player *player, int map[MAP_HEIGHT][MAP_WIDTH]);
+void handle_input(Player *player, const Uint8 *keystate, int map[MAP_HEIGHT][MAP_WIDTH]);
+
+
 // Returns 0 on success, non-zero on failure
 int init_graphics(Graphics *gfx);
 
@@ -80,4 +81,3 @@ void render_frame(Graphics *gfx, Player *player, int map[MAP_HEIGHT][MAP_WIDTH])
 void handle_input(Player *player, const Uint8 *keystate, int map[MAP_HEIGHT][MAP_WIDTH]);
 
 #endif
-

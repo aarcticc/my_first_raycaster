@@ -1,72 +1,97 @@
-/*
- TODO: Create Renderer/check renderer
-*/
-//! Standart C Library
+//! Standard C Library
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
+#include <math.h>
+
 //! Project Headers
 #include "raycaster.h"
 #include "texture.h"
 #include "map.h"
-//! OPENMP Header
-#include <omp.h>
+#include "log_utils.h"
 
 // Initialize graphics system - creates window, renderer, and texture buffer
 int init_graphics(Graphics *gfx) {
-    if (!gfx) return -1;
-
-    if (SDL_Init(SDL_INIT_VIDEO) != 0) {
-        fprintf(stderr, "SDL_Init failed: %s\n", SDL_GetError());
+    if (!gfx) {
+        log_error(log_file, "[Graphics] Invalid graphics pointer");
         return -1;
     }
 
-    // Optional: prefer a good scaling backend
-    SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "1");
+    // Initialize SDL with all required subsystems
+    if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER | SDL_INIT_EVENTS) < 0) {
+        log_error(log_file, "[SDL] Initialization failed");
+        fprintf(stderr, "SDL Error: %s\n", SDL_GetError());
+        return -1;
+    }
 
+    // Set render quality and disable compositor bypass
+    SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "1");
+    SDL_SetHint(SDL_HINT_VIDEO_X11_NET_WM_BYPASS_COMPOSITOR, "0");
+    SDL_SetHint(SDL_HINT_VIDEO_MINIMIZE_ON_FOCUS_LOSS, "0");
+
+    // Create window with proper flags
     gfx->window = SDL_CreateWindow(
         "Raycaster",
         SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
         SCREEN_WIDTH, SCREEN_HEIGHT,
-        SDL_WINDOW_SHOWN
+        SDL_WINDOW_SHOWN | SDL_WINDOW_ALLOW_HIGHDPI
     );
+
     if (!gfx->window) {
-        fprintf(stderr, "SDL_CreateWindow failed: %s\n", SDL_GetError());
+        log_error(log_file, "[SDL] Window creation failed");
+        fprintf(stderr, "SDL Error: %s\n", SDL_GetError());
         SDL_Quit();
         return -1;
     }
 
+    // Create renderer with vsync and accelerated flag
     gfx->renderer = SDL_CreateRenderer(gfx->window, -1,
-                                       SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
+        SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
+
     if (!gfx->renderer) {
-        fprintf(stderr, "SDL_CreateRenderer failed: %s\n", SDL_GetError());
+        log_error(log_file, "[SDL] Renderer creation failed");
+        fprintf(stderr, "SDL Error: %s\n", SDL_GetError());
         SDL_DestroyWindow(gfx->window);
         SDL_Quit();
         return -1;
     }
 
+    // Make sure OpenGL/Direct3D coordinate system is set up correctly
+    SDL_RenderSetLogicalSize(gfx->renderer, SCREEN_WIDTH, SCREEN_HEIGHT);
+    SDL_SetRenderDrawBlendMode(gfx->renderer, SDL_BLENDMODE_BLEND);
+    SDL_SetRenderDrawColor(gfx->renderer, 0, 0, 0, 255);
+
+    // Create main rendering texture
     gfx->texture = SDL_CreateTexture(gfx->renderer,
-                                     SDL_PIXELFORMAT_ARGB8888,
-                                     SDL_TEXTUREACCESS_STREAMING,
-                                     SCREEN_WIDTH, SCREEN_HEIGHT);
+        SDL_PIXELFORMAT_ARGB8888,
+        SDL_TEXTUREACCESS_STREAMING,
+        SCREEN_WIDTH, SCREEN_HEIGHT);
+
     if (!gfx->texture) {
-        fprintf(stderr, "SDL_CreateTexture failed: %s\n", SDL_GetError());
+        log_error(log_file, "[SDL] Texture creation failed");
+        fprintf(stderr, "SDL Error: %s\n", SDL_GetError());
         SDL_DestroyRenderer(gfx->renderer);
         SDL_DestroyWindow(gfx->window);
         SDL_Quit();
         return -1;
     }
 
-    gfx->pixels = malloc(sizeof(Uint32) * SCREEN_WIDTH * SCREEN_HEIGHT);
+    // Allocate pixel buffer
+    gfx->pixels = calloc(SCREEN_WIDTH * SCREEN_HEIGHT, sizeof(Uint32));
     if (!gfx->pixels) {
-        fprintf(stderr, "malloc for pixels failed\n");
+        log_error(log_file, "[Memory] Failed to allocate pixel buffer");
         SDL_DestroyTexture(gfx->texture);
         SDL_DestroyRenderer(gfx->renderer);
         SDL_DestroyWindow(gfx->window);
         SDL_Quit();
         return -1;
     }
-    memset(gfx->pixels, 0, sizeof(Uint32) * SCREEN_WIDTH * SCREEN_HEIGHT);
 
+    // Clear initial screen
+    SDL_RenderClear(gfx->renderer);
+    SDL_RenderPresent(gfx->renderer);
+    
+    log_error(log_file, "[Graphics] Initialization successful");
     return 0;
 }
 
@@ -82,6 +107,15 @@ void shutdown_graphics(Graphics *gfx) {
 
 // Main rendering function - renders one frame
 void render_frame(Graphics *gfx, Player *player, int map[MAP_HEIGHT][MAP_WIDTH]) {
+    if (!gfx || !gfx->renderer || !gfx->texture || !gfx->pixels) {
+        log_error(log_file, "[Render] Invalid graphics state");
+        return;
+    }
+
+    // Clear screen
+    SDL_SetRenderDrawColor(gfx->renderer, 0, 0, 0, 255);
+    SDL_RenderClear(gfx->renderer);
+
     // Pre-calculate values used in floor/ceiling casting
     const float posZ = SCREEN_HEIGHT / 2.0f;
     const float rayDirX0 = player->dirX - player->planeX;
@@ -90,8 +124,6 @@ void render_frame(Graphics *gfx, Player *player, int map[MAP_HEIGHT][MAP_WIDTH])
     const float rayDirY1 = player->dirY + player->planeY;
 
     // FLOOR AND CEILING CASTING
-    #pragma omp parallel for schedule(dynamic, 16) shared(gfx, floor_texture, ceiling_texture) \
-            firstprivate(posZ, rayDirX0, rayDirY0, rayDirX1, rayDirY1, player)
     for(int y = SCREEN_HEIGHT/2; y < SCREEN_HEIGHT; y++) {
         const float rowDistance = posZ / (y - SCREEN_HEIGHT/2);
         const float floorStepX = rowDistance * (rayDirX1 - rayDirX0) / SCREEN_WIDTH;
@@ -118,8 +150,6 @@ void render_frame(Graphics *gfx, Player *player, int map[MAP_HEIGHT][MAP_WIDTH])
     }
 
     // WALL CASTING
-    #pragma omp parallel for schedule(dynamic, 16) shared(gfx, wall_textures, map) \
-            firstprivate(player)
     for (int x = 0; x < SCREEN_WIDTH; x++) {
         // Calculate ray position and direction
         float cameraX = 2.0f * x / SCREEN_WIDTH - 1.0f;  // x-coordinate in camera space
@@ -220,10 +250,20 @@ void render_frame(Graphics *gfx, Player *player, int map[MAP_HEIGHT][MAP_WIDTH])
         }
     }
 
-    // Update texture with rendered frame
-    SDL_UpdateTexture(gfx->texture, NULL, gfx->pixels, SCREEN_WIDTH * sizeof(Uint32));
-    SDL_RenderClear(gfx->renderer);
-    SDL_RenderCopy(gfx->renderer, gfx->texture, NULL, NULL);
+    // Update texture with new frame data
+    if (SDL_UpdateTexture(gfx->texture, NULL, gfx->pixels, 
+                         SCREEN_WIDTH * sizeof(Uint32)) < 0) {
+        log_error(log_file, "[Render] Texture update failed");
+        return;
+    }
+
+    // Copy texture to renderer
+    if (SDL_RenderCopy(gfx->renderer, gfx->texture, NULL, NULL) < 0) {
+        log_error(log_file, "[Render] Texture copy failed");
+        return;
+    }
+
+    // Present the frame
     SDL_RenderPresent(gfx->renderer);
 }
 
