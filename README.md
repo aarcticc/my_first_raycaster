@@ -196,6 +196,7 @@ The raycaster uses basic trigonometry:
 
 ```
 my_first_raycaster/
+├── assets/                 # Screenshots
 ├── src/
 │   ├── main.c              # Entry point and main game loop
 │   ├── raycaster.c         # Core raycasting algorithm
