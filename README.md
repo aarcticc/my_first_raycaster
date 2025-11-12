@@ -1,7 +1,7 @@
 ### Download
 
-'''bash
-git clone https://github.com/aarcticc/my 
+```bash
+git clone https://github.com/aarcticc/my_first_raycaster/
 
 ---
 
