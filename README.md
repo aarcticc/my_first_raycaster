@@ -193,27 +193,30 @@ The raycaster uses basic trigonometry:
 - **Wall height**: `(WALL_HEIGHT / distance) * distance_to_projection_plane`
 
 ## Project Structure
+Files or folders not mentioned here, are not relevant  to understand.
 
 ```
 my_first_raycaster/
-├── assets/                 # Screenshots
+├── assets/                 # Textures
 ├── src/
-│   ├── main.c              # Entry point and main game loop
-│   ├── raycaster.c         # Core raycasting algorithm
-│   ├── render.c            # Rendering functions
-│   ├── player.c            # Player movement and rotation
-│   ├── map.c               # Map loading and collision detection
-│   └── utils.c             # Utility functions
+│   ├── main.c                # Entry point, main game loop and player logic
+│   ├── raycaster.c           # Core raycasting algorithm
+│   ├── texture.c             # Sprite rendering and texturing
+│   ├── map.c                 # Map loading
+│   └── log_utils.c           # Utility functions and log mechanic
 ├── include/
-│   ├── raycaster.h         # Main header file
-│   ├── player.h            # Player structure and functions
-│   ├── map.h               # Map structure and functions
-│   └── config.h            # Configuration constants
+│   ├── raycaster.h           # Main header file
+│   ├── player.h              # Player structure and functions
+│   ├── json.h                # C++ json lib (will be removed someday)
+│   ├── log_utils.h           # Decleration of log titles and format
+│   ├── map.h                 # Map structure and functions
+│   ├── start_wrapper.h       # typedef header for cleaner code
+│   └── texture.h             # Decleration of texture variables
 ├── maps/
-│   ├── level1.map          # Sample map files
-│   └── level2.map
+│   └── MAP1.json             # Your costume map generated with the HTML    
 ├── Makefile                # Build configuration
-├── README.md               # This file
+├── compile_cmds.txt        # Build commands 
+├── mapmaker.html           # For making costume maps
 └── LICENSE                 # License information
 ```
 
